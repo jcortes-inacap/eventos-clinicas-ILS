@@ -1,143 +1,142 @@
-# AsteroAdmin
+# Eventos Clínicas ILS
 
-A responsive open source admin dashboard and control panel built with Bootstrap 5 and Astro.
+Sistema de administración web para la gestión de eventos de clínicas ILS, basado en AsteroAdmin con Bootstrap 5 y Astro, completamente localizado en español.
 
-[![AsteroAdmin Dashboard](https://raw.githubusercontent.com/asterodigital/bootstrap-admin-template/main/.github/images/feature-image.png)](https://astero-admin.asterodigital.com/pages/dashboard)
+[![Eventos Clínicas ILS](https://raw.githubusercontent.com/asterodigital/bootstrap-admin-template/main/.github/images/feature-image.png)](https://astero-admin.asterodigital.com/pages/dashboard)
 
-<!-- Product Hunt badge - Verify post_id if necessary -->
-<a href="https://www.producthunt.com/posts/astero-admin?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-astero&#0045;admin" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=941743&theme=light" alt="Astero&#0032;Admin - Free&#0032;Bootstrap&#0032;5&#0032;Admin&#0032;Template | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+## Descripción General
 
-## Overview
+Eventos Clínicas ILS es una aplicación web moderna y responsiva diseñada específicamente para la gestión integral de eventos médicos y clínicos. Construida sobre la base de AsteroAdmin, ofrece una interfaz de administración completa, intuitiva y altamente personalizable en español.
 
-AsteroAdmin is a modern, responsive admin template designed to provide a solid foundation for your administrative interface needs. Built with the latest web technologies and best practices, it offers a clean, intuitive, and highly customizable user experience for building powerful dashboards, admin panels, and back-office applications.
+## Características Principales
 
-## Key Features
-
-- ✨ **Built with Astro** - Modern static site generator for performance.
-- 🎨 **Bootstrap 5.3.3** - Latest version for a clean, professional look.
-- 📱 **Fully Responsive** - Works perfectly on all devices and screen sizes.
-- 🌙 **Light/Dark Mode** - Switch between light and dark themes easily.
-- 🚀 **Optimized Build System** - Uses ESBuild, LightningCSS, PostCSS for fast builds.
-- 📦 **Modular Architecture** - Well-organized SCSS, JS, and Astro components.
-- 🔧 **Highly Customizable** - Easy to adapt via SCSS variables.
-- 📊 **Dashboard Components** - Charts, tables, forms, and more included.
-- ⚡ **Performance Optimized** - Fast loading times and smooth interactions.
-- 🔄 **Live Reload** - Instant preview during development (`npm run dev`).
-- 📚 **Component Examples** - Clear examples for UI elements.
-- 🔒 **Auth Page Designs** - Ready-made login and signup page designs.
-- 🌐 **RTL Support** - Works perfectly for right-to-left languages.
-- 📁 **Logical Folder Structure** - Easy navigation for developers.
-- 🧩 **Extensive UI Components** - Wide collection of pre-built elements.
-- 📱 **Offcanvas Navbar** - Modern navigation for mobile and desktop.
+- ✨ **Construido con Astro** - Generador de sitios estáticos moderno para máximo rendimiento
+- 🎨 **Bootstrap 5.3.3** - Última versión para un diseño limpio y profesional
+- 📱 **Completamente Responsivo** - Funciona perfectamente en todos los dispositivos
+- 🌙 **Modo Claro/Oscuro** - Cambio fácil entre temas
+- 🇪🇸 **Completamente en Español** - Interfaz, mensajes y configuración regional
+- 🚀 **Sistema de Compilación Optimizado** - Usa ESBuild, LightningCSS, PostCSS
+- 📦 **Arquitectura Modular** - Componentes SCSS, JS y Astro bien organizados
+- 🔧 **Altamente Personalizable** - Fácil adaptación mediante variables SCSS
+- 📊 **Componentes para Dashboard** - Gráficos, tablas, formularios incluidos
+- ⚡ **Optimizado para Rendimiento** - Tiempos de carga rápidos
+- 🔄 **Recarga en Vivo** - Vista previa instantánea durante desarrollo
+- 📚 **Ejemplos de Componentes** - Ejemplos claros para elementos UI
+- 🔒 **Diseños de Autenticación** - Páginas de login y registro listas
+- 🌐 **Soporte RTL** - Funciona perfectamente para idiomas de derecha a izquierda
+- 📁 **Estructura de Carpetas Lógica** - Navegación fácil para desarrolladores
+- 🧩 **Componentes UI Extensos** - Amplia colección de elementos pre-construidos
+- 📱 **Navbar Offcanvas** - Navegación moderna para móvil y escritorio
 
 ## Demo
 
-Check out the live demo: [AsteroAdmin Demo](https://astero-admin.asterodigital.com/pages/dashboard)
+Consulta la demo en vivo: [AsteroAdmin Demo](https://astero-admin.asterodigital.com/pages/dashboard)
 
-## Getting Started
+## Configuración Regional
 
-### Prerequisites
+### Idioma por Defecto: Español
+El sistema está completamente configurado en español:
+- 🏷️ **Atributo lang="es"** en todas las páginas HTML
+- 📅 **Formato de fecha**: DD/MM/YYYY
+- ⏰ **Formato de hora**: HH:mm (24 horas)
+- 💰 **Moneda por defecto**: EUR (€)
+- 🌍 **Zona horaria**: Europe/Madrid
+- 📊 **DataTables**: Textos de interfaz en español
+- 💬 **Mensajes y tooltips**: Completamente traducidos
 
-- Node.js (v18 or later recommended)
-- npm or yarn package manager
+## Comenzando
 
-### Installation
+### Prerrequisitos
 
-You can install AsteroAdmin in three ways:
+- Node.js (v18 o superior recomendado)
+- PNPM o npm como gestor de paquetes
 
-#### 1. Using npm
+### Instalación
 
-```bash
-npm install asteroadmin
-```
+Puedes instalar Eventos Clínicas ILS de la siguiente manera:
 
-After installation, you can import the CSS and JavaScript files in your project:
-
-```javascript
-// Import CSS
-import 'asteroadmin/dist/css/style.css'
-
-// Import JavaScript (if needed)
-import 'asteroadmin/dist/js/main.js'
-```
-
-#### 2. Using CDN
-
-Add the following CDN links to your HTML file (replace `1.0.5` with the desired version):
-
-```html
-<!-- CSS -->
-<link href="https://cdn.jsdelivr.net/npm/asteroadmin@1.0.5/dist/css/style.min.css" rel="stylesheet">
-
-<!-- JavaScript -->
-<script src="https://cdn.jsdelivr.net/npm/asteroadmin@1.0.5/dist/js/main.min.js" type="module"></script>
-```
-
-#### 3. Clone the repository
+#### 1. Usando PNPM (recomendado)
 
 ```bash
-git clone https://github.com/asterodigital/bootstrap-admin-template.git
-cd bootstrap-admin-template
+# Clonar el repositorio
+git clone https://github.com/jcortes-inacap/eventos-clinicas-ILS.git
+cd eventos-clinicas-ILS
 ```
 
-2. Install dependencies:
+#### 2. Usando NPM
 
 ```bash
+# Clonar el repositorio
+git clone https://github.com/jcortes-inacap/eventos-clinicas-ILS.git
+cd eventos-clinicas-ILS
+```
+
+2. Instalar dependencias:
+
+```bash
+# Con PNPM (recomendado)
+pnpm install
+
+# O con NPM
 npm install
 ```
 
-3. Start the development server:
+3. Iniciar el servidor de desarrollo:
 
 ```bash
+# Con PNPM
+pnpm dev
+
+# O con NPM
 npm run dev
 ```
 
-The development server will start at `http://localhost:1234`
+El servidor de desarrollo se iniciará en `http://localhost:1234`
 
-## Build System
+## Sistema de Compilación
 
-AsteroAdmin uses a custom-built, optimized build system that handles:
+Eventos Clínicas ILS utiliza un sistema de compilación personalizado y optimizado que maneja:
 
-- SCSS compilation with source maps
-- JavaScript bundling and minification
-- Asset optimization
-- Live reloading
-- Production builds with optimizations
+- Compilación de SCSS con source maps
+- Bundling y minificación de JavaScript
+- Optimización de assets
+- Recarga en vivo durante desarrollo
+- Builds de producción optimizados
 
-### Available Scripts
+### Scripts Disponibles
 
-| Command | Description |
+| Comando | Descripción |
 |---------|-------------|
-| `npm run dev` | Start development server with hot reloading |
-| `npm run build` | Build optimized files for production |
-| `npm run css` | Compile SCSS to CSS with vendor prefixes |
-| `npm run js` | Bundle and optimize JavaScript files |
-| `npm run assets` | Process and optimize static assets |
-| `npm run lint` | Run code quality checks |
-| `npm run fixlint` | Automatically fix linting issues |
-| `npm run format:html` | Format HTML files using Prettier |
-| `npm run clean` | Remove build artifacts |
-| `npm run watch` | Watch files for changes |
-| `npm run serve` | Serve the built files locally |
-| `npm run bundlewatch` | Check bundle sizes against limits |
+| `pnpm dev` | Iniciar servidor de desarrollo con hot reloading |
+| `pnpm build` | Compilar archivos optimizados para producción |
+| `pnpm css` | Compilar SCSS a CSS con prefijos de navegador |
+| `pnpm js` | Empaquetar y optimizar archivos JavaScript |
+| `pnpm assets` | Procesar y optimizar assets estáticos |
+| `pnpm lint` | Ejecutar verificaciones de calidad de código |
+| `pnpm fixlint` | Corregir automáticamente errores de linting |
+| `pnpm format:html` | Formatear archivos HTML usando Prettier |
+| `pnpm clean` | Eliminar archivos de compilación |
+| `pnpm watch` | Observar archivos para cambios |
+| `pnpm serve` | Servir los archivos compilados localmente |
+| `pnpm bundlewatch` | Verificar tamaños de bundles contra límites |
 
-## Project Structure
+## Estructura del Proyecto
 
 ```plaintext
 .
-├── config/             # Build and tool configurations (PostCSS, Rollup, etc.)
-├── dist/               # Compiled files (generated by build process)
-├── src/                # Source files
-│   ├── assets/         # Static assets (images, fonts, data, etc.)
-│   ├── html/           # Astro components, layouts, and pages (.astro files)
-│   │   ├── components/ # Reusable UI components (Astro)
-│   │   ├── layouts/    # Page layouts (Astro)
-│   │   └── pages/      # Site pages (Astro)
-│   ├── js/             # JavaScript source files
-│   │   ├── components/ # JS for specific components
-│   │   ├── layout/     # JS for layout features (dark mode, sidebar)
-│   │   └── main.js     # Main JavaScript entry point
-│   ├── scss/           # SCSS stylesheets
+├── config/             # Configuraciones de herramientas (PostCSS, Rollup, etc.)
+├── dist/               # Archivos compilados (generados por el proceso de build)
+├── src/                # Archivos fuente
+│   ├── assets/         # Assets estáticos (imágenes, fuentes, datos, etc.)
+│   ├── html/           # Componentes, layouts y páginas Astro (.astro files)
+│   │   ├── components/ # Componentes UI reutilizables (Astro)
+│   │   ├── layouts/    # Layouts de página (Astro)
+│   │   └── pages/      # Páginas del sitio (Astro)
+│   ├── js/             # Archivos JavaScript fuente
+│   │   ├── components/ # JS para componentes específicos
+│   │   ├── layout/     # JS para características de layout (modo oscuro, sidebar)
+│   │   └── main.js     # Punto de entrada principal de JavaScript
+│   ├── scss/           # Hojas de estilo SCSS
 │   │   ├── base/       # Base styles (typography, reset)
 │   │   ├── components/ # Component-specific styles
 │   │   ├── core/       # Core mixins and utilities
@@ -277,8 +276,12 @@ AsteroDigital - [https://asterodigital.com](https://asterodigital.com)
 ---
 
 Made with ❤️ by AsteroDigital
-#   D a s h b o a r d _ C l i n i c a  
- #   e v e n t o s - c l i n i c a s - I L S  
- #   e v e n t o s - c l i n i c a s - I L S  
- #   e v e n t o s - c l i n i c a s - I L S  
+#   D a s h b o a r d _ C l i n i c a 
+ 
+ #   e v e n t o s - c l i n i c a s - I L S 
+ 
+ #   e v e n t o s - c l i n i c a s - I L S 
+ 
+ #   e v e n t o s - c l i n i c a s - I L S 
+ 
  
