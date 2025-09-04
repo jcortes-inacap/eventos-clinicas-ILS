@@ -1,0 +1,243 @@
+---
+import AdminLayout from '../../layouts/admin/admin-layout.astro'
+import PageHeader from '../../components/common/page-header.astro'
+import type { Props as PageHeaderProps } from '../../components/common/page-header.astro'
+import { getAssetPrefix, getPathPrefix } from '../../../utils/path.js'
+
+const usuarios = [
+  {
+    id: 1,
+    nombre: 'Juan',
+    apellidos: 'Pérez',
+    usuario: 'jperez',
+    rol: { descripcion: 'Administrador' },
+    carrera: { descripcion: 'Ingeniería en Sistemas' }
+  },
+  {
+    id: 2,
+    nombre: 'María',
+    apellidos: 'López',
+    usuario: 'mlopez',
+    rol: { descripcion: 'Profesor' },
+    carrera: { descripcion: 'Medicina' }
+  }
+]
+
+const roles = [
+  { id_roles: 1, descripcion: 'Administrador' },
+  { id_roles: 2, descripcion: 'Profesor' },
+  { id_roles: 3, descripcion: 'Estudiante' },
+  { id_roles: 4, descripcion: 'Director de carrera' }
+]
+
+const carreras = [
+  { id_carrera: 1, descripcion: 'Ingeniería en Sistemas' },
+  { id_carrera: 2, descripcion: 'Medicina' },
+  { id_carrera: 3, descripcion: 'Psicología' }
+]
+
+const assignmentPageConfig: PageHeaderProps = {
+  title: 'Assignments Settings',
+  breadcrumbs: [
+    { label: 'Dashboard', href: getPathPrefix('/dashboard'), class: '' },
+    { label: 'Users Assignments', class: 'active' }
+  ]
+}
+
+const pageScript = `
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Función para limpiar el backdrop y resetear modales
+    const cleanupModal = () => {
+      const backdrop = document.querySelector('.modal-backdrop');
+      if (backdrop) {
+        backdrop.remove();
+      }
+      document.body.classList.remove('modal-open');
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    };
+
+    // Manejador para el botón cancelar y cerrar (x) de los modales
+    const modalCancelButtons = document.querySelectorAll('[data-bs-dismiss="modal"]');
+    modalCancelButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        cleanupModal();
+      });
+    });
+
+    // Manejador para cuando el modal se oculta por cualquier medio
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(modal => {
+      modal.addEventListener('hidden.bs.modal', () => {
+        cleanupModal();
+      });
+    });
+
+    // Lógica existente para el modal de edición
+    const editModal = document.getElementById('editUserModal');
+    const editButtons = document.querySelectorAll('.edit-user');
+
+    editButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const userId = this.getAttribute('data-user-id');
+        const modal = new bootstrap.Modal(editModal);
+        modal.show();
+      });
+    });
+  });
+</script>
+`
+
+---
+
+<AdminLayout
+  title="Gestión de Usuarios"
+  description="Administración de usuarios del sistema"
+  currentPath="/users/assignment"
+  pageScript={pageScript}
+>
+  <PageHeader {...assignmentPageConfig} />
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">Lista de Usuarios</h5>
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+            <i class="ri-user-add-line me-1"></i>
+            Nuevo Usuario
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Usuario</th>
+                  <th>Rol</th>
+                  <th>Carrera</th>
+                  <th class="text-end">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {usuarios.map(u => (
+                  <tr>
+                    <td>{u.nombre} {u.apellidos}</td>
+                    <td>{u.usuario}</td>
+                    <td>
+                      <span class="badge bg-primary">{u.rol.descripcion}</span>
+                    </td>
+                    <td>{u.carrera ? u.carrera.descripcion : '—'}</td>
+                    <td class="text-end">
+                      <button class="btn btn-sm btn-light me-2 edit-user"
+                              data-user-id={u.id}
+                              data-bs-toggle="modal"
+                              data-bs-target="#editUserModal">
+                        <i class="ri-edit-line"></i>
+                      </button>
+                      <button class="btn btn-sm btn-danger">
+                        <i class="ri-delete-bin-line"></i>
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Agregar Usuario -->
+  <div class="modal fade" id="addUserModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Agregar Usuario</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="mb-3">
+              <label class="form-label">Nombre</label>
+              <input type="text" class="form-control" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Apellidos</label>
+              <input type="text" class="form-control" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Rol</label>
+              <select class="form-select">
+                {roles.map(r => (
+                  <option value={r.id_roles}>{r.descripcion}</option>
+                ))}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Carrera</label>
+              <select class="form-select">
+                <option value="">— Ninguna —</option>
+                {carreras.map(c => (
+                  <option value={c.id_carrera}>{c.descripcion}</option>
+                ))}
+              </select>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Editar Usuario -->
+  <div class="modal fade" id="editUserModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Editar Usuario</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="mb-3">
+              <label class="form-label">Nombre</label>
+              <input type="text" class="form-control" id="editNombre" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Apellidos</label>
+              <input type="text" class="form-control" id="editApellidos" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Rol</label>
+              <select class="form-select" id="editRol">
+                {roles.map(r => (
+                  <option value={r.id_roles}>{r.descripcion}</option>
+                ))}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Carrera</label>
+              <select class="form-select" id="editCarrera">
+                <option value="">— Ninguna —</option>
+                {carreras.map(c => (
+                  <option value={c.id_carrera}>{c.descripcion}</option>
+                ))}
+              </select>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary">Guardar cambios</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</AdminLayout>
