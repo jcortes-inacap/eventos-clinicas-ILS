@@ -1,0 +1,68 @@
+{
+  "defaultLanguage": "es",
+  "defaultCountry": "ES", 
+  "locale": "es-ES",
+  "dateFormat": "DD/MM/YYYY",
+  "timeFormat": "HH:mm",
+  "currency": "EUR",
+  "timezone": "Europe/Madrid",
+  "languages": {
+    "es": {
+      "name": "Español",
+      "code": "es",
+      "flag": "🇪🇸",
+      "dateFormat": "DD/MM/YYYY",
+      "timeFormat": "HH:mm",
+      "currency": "EUR"
+    },
+    "en": {
+      "name": "English",
+      "code": "en",
+      "flag": "🇺🇸",
+      "dateFormat": "MM/DD/YYYY", 
+      "timeFormat": "h:mm A",
+      "currency": "USD"
+    },
+    "fr": {
+      "name": "Français",
+      "code": "fr",
+      "flag": "🇫🇷",
+      "dateFormat": "DD/MM/YYYY",
+      "timeFormat": "HH:mm",
+      "currency": "EUR"
+    },
+    "de": {
+      "name": "Deutsch",
+      "code": "de",
+      "flag": "🇩🇪",
+      "dateFormat": "DD.MM.YYYY",
+      "timeFormat": "HH:mm",
+      "currency": "EUR"
+    },
+    "pt": {
+      "name": "Português",
+      "code": "pt",
+      "flag": "🇵🇹",
+      "dateFormat": "DD/MM/YYYY",
+      "timeFormat": "HH:mm",
+      "currency": "EUR"
+    }
+  },
+  "dataTables": {
+    "es": {
+      "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
+      "infoEmpty": "No hay registros para mostrar",
+      "infoFiltered": "(filtrado de _MAX_ registros totales)",
+      "zeroRecords": "No se encontraron registros coincidentes",
+      "processing": "Cargando...",
+      "search": "Buscar:",
+      "lengthMenu": "Mostrar _MENU_ registros por página",
+      "paginate": {
+        "first": "Primero",
+        "last": "Último",
+        "next": "Siguiente",
+        "previous": "Anterior"
+      }
+    }
+  }
+}
