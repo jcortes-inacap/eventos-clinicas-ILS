@@ -20,7 +20,7 @@ Scripts SQL para la creación y población inicial de la base de datos PostgreSQ
 
 ## Instalación
 
-1. Clona el repositorio
+1. Clona el repositorio -> git clone -b master https://github.com/jcortes-inacap/eventos-clinicas-ILS.git
 2. Configura el backend (en la carpeta back-end -> composer install -> php artisan serve --port=3000 y npm install -> npm run dev)
 3. Configura el frontend (en la carpeta back-end -> npm install -> npm run dev)
 4. Ejecuta los scripts SQL en postgressql
