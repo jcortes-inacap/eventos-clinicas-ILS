@@ -8,13 +8,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   var defaults = {
     language: {
-      info: "Showing _START_ to _END_ of _TOTAL_ records",
-      infoEmpty: "Showing no records",
-      infoFiltered: "(filtered from _MAX_ total records)",
-      zeroRecords: "No matching records found",
+      info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+      infoEmpty: "No hay registros para mostrar",
+      infoFiltered: "(filtrado de _MAX_ registros totales)",
+      zeroRecords: "No se encontraron registros coincidentes",
       lengthMenu: "_MENU_",
       processing:
-        '<span class="spinner-border w-15px h-15px text-muted align-middle me-2"></span> <span class="text-gray-600">Loading...</span>',
+        '<span class="spinner-border w-15px h-15px text-muted align-middle me-2"></span> <span class="text-gray-600">Cargando...</span>',
       paginate: {
         first: '<i class="ri-arrow-left-double-line"></i>',
         last: '<i class="ri-arrow-right-double-line"></i>',

@@ -1,9 +1,9 @@
 {
-  "name": "asteroadmin",
-  "description": "Free Bootstrap 5 Admin Template.",
+  "name": "eventos-clinicas-ils",
+  "description": "Sistema de administración web para la gestión de eventos de clínicas ILS",
   "version": "1.0.9",
   "license": "MIT",
-  "author": "AsteroDigital <https://asterodigital.com>",
+  "author": "INACAP <https://inacap.cl>",
   "type": "module",
   "scripts": {
     "dev": "node tools/dev.mjs",
