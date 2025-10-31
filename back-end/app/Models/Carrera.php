@@ -8,6 +8,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Post;
 
+
 // Carrera.php
 class Carrera extends Model
 {
@@ -25,5 +26,9 @@ class Carrera extends Model
     {
         return $this->hasMany(Usuario::class, 'id_carrera', 'id_carrera');
     }
-}
 
+    public function area()
+    {
+        return $this->belongsTo(Area::class, 'id_area', 'id_area');
+    }
+}
