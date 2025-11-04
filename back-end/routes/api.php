@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\AsignacionController;
+use App\Http\Controllers\RolController;
 use App\Http\Controllers\CatalogoController;
 use App\Models\Usuario;
 use App\Http\Controllers\UsuarioController;
@@ -63,4 +64,13 @@ Route::prefix('catalogos')->group(function() {
     });
 
     // TODO agregar más catálogos si es necesario, por ejemplo docentes, asistentes, etc...
+});
+
+
+Route::prefix('roles')->group(function () {
+    Route::get('/', [RolController::class, 'index']);
+    Route::get('/{id}', [RolController::class, 'show']);
+    Route::post('/', [RolController::class, 'store']);
+    Route::put('/{id}', [RolController::class, 'update']);
+    Route::delete('/{id}', [RolController::class, 'destroy']);
 });
