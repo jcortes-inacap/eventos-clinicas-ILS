@@ -44,9 +44,6 @@ try {
 >
   <PageHeader {...pageHeaderProps} />
 
-  <!-- Depuración temporal -->
-  <!-- <pre>{JSON.stringify(roles, null, 2)}</pre> -->
-
   <!-- Roles Cards -->
   <div class="row g-4" id="rolesContainer">
     {roles.length === 0 ? (
@@ -58,13 +55,17 @@ try {
             <div class="card-header pb-2">
               <h5 class="fw-semibold text-capitalize mb-2">{role.descripcion}</h5>
               <p class="text-muted small mb-0">ID: {role.id_roles}</p>
-              <p class="text-muted small mb-0">Estado: {role.estado === 1 ? 'Activo' : 'Inactivo'}</p>
+              <p class="text-muted small mb-0">
+                Estado: {role.estado === 1 ? 'Activo' : 'Inactivo'}
+              </p>
             </div>
+
             <div class="card-body p-2 d-flex flex-column">
               <ul class="list-unstyled mb-0">
                 <li class="text-muted fst-italic small">Permisos no disponibles</li>
               </ul>
             </div>
+
             <div class="card-footer d-flex justify-content-between gap-2">
               <a
                 href={getPathPrefix(`/roles-permissions/roles/edit/${role.id_roles}`)}
@@ -74,20 +75,7 @@ try {
               </a>
               <button
                 class="btn btn-sm btn-outline-danger px-3 py-1"
-                onClick={async () => {
-                  if (!confirm('¿Deseas desactivar este rol?')) return;
-                  try {
-                    const res = await fetch(`http://127.0.0.1:8000/api/roles/${role.id_roles}`, { method: 'DELETE' });
-                    if (!res.ok) throw new Error('Error al desactivar');
-                    alert('Rol desactivado correctamente');
-                    // Remover card del DOM de manera segura
-                    const card = document.getElementById(`role-card-${role.id_roles}`);
-                    card?.remove();
-                  } catch (err) {
-                    console.error(err);
-                    alert('No se pudo desactivar el rol');
-                  }
-                }}
+                data-role-id={role.id_roles}
               >
                 Desactivar
               </button>
@@ -97,6 +85,31 @@ try {
       ))
     )}
   </div>
-</AdminLayout>
 
+  <!-- Script para manejar la desactivación de roles -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const buttons = document.querySelectorAll('[data-role-id]');
+      buttons.forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const id = btn.dataset.roleId;
+          if (!confirm('¿Deseas desactivar este rol?')) return;
+
+          try {
+            const res = await fetch(`http://127.0.0.1:8000/api/roles/${id}`, {
+              method: 'DELETE',
+            });
+
+            if (!res.ok) throw new Error('Error al desactivar el rol');
+
+            alert('Rol desactivado correctamente');
+            document.getElementById(`role-card-${id}`)?.remove();
+          } catch (err) {
+            console.error(err);
+            alert('No se pudo desactivar el rol');
+          }
+        });
+      });
+    });
+  </script>
 </AdminLayout>

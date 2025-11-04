@@ -1,0 +1,152 @@
+---
+export const prerender = false;
+
+import AdminLayout from '../../../../layouts/admin/admin-layout.astro';
+import PageHeader from '../../../../components/common/page-header.astro';
+import type { Props as PageHeaderProps } from '../../../../components/common/page-header.astro';
+import { getPathPrefix } from '../../../../../utils/path.js';
+
+// Obtener el parámetro "id" desde la URL
+const { id } = Astro.params;
+
+const pageHeaderProps: PageHeaderProps = {
+  title: 'Editar Rol',
+  breadcrumbs: [
+    { label: 'Panel', href: getPathPrefix('/dashboard') },
+    { label: 'Roles y Permisos', href: getPathPrefix('/roles-permissions') },
+    { label: 'Roles', href: getPathPrefix('/roles-permissions/roles/list') },
+    { label: 'Editar Rol', class: 'active' },
+  ],
+  actions: [
+    {
+      label: 'Volver',
+      href: getPathPrefix('/roles-permissions/roles/list'),
+      type: 'link',
+      variant: 'btn-outline-primary',
+      icon: 'ri-arrow-left-s-line',
+    },
+  ],
+};
+---
+
+<AdminLayout
+  title="Editar Rol"
+  description="Modificar un rol existente"
+  currentPath="roles-permissions/roles/edit"
+>
+  <PageHeader {...pageHeaderProps} />
+
+  <!-- FORMULARIO PARA EDITAR ROL -->
+  <form id="editRoleForm" novalidate>
+    <div class="row justify-content-center">
+      <div class="col-md-8 mb-3">
+        <div class="card">
+          <div class="card-body">
+            <!-- Descripción -->
+            <div class="mb-3">
+              <label for="roleName" class="form-label">
+                Descripción del Rol <span class="text-danger">*</span>
+              </label>
+              <input
+                type="text"
+                class="form-control"
+                id="roleName"
+                name="roleName"
+                placeholder="Ingrese la descripción del rol"
+                required
+              />
+            </div>
+
+            <!-- Estado -->
+            <div class="mb-3">
+              <label for="status" class="form-label">
+                Estado <span class="text-danger">*</span>
+              </label>
+              <select class="form-select" id="status" name="status" required>
+                <option value="1">Activo</option>
+                <option value="0">Inactivo</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="card-footer">
+            <div class="d-flex justify-content-end gap-2">
+              <a href={getPathPrefix('/roles-permissions/roles/list')} class="btn btn-outline-secondary">
+                Cancelar
+              </a>
+              <button type="button" id="saveBtn" class="btn btn-primary">Guardar Cambios</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <!-- Script para cargar y actualizar datos -->
+  <script type="module" is:inline>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const form = document.getElementById("editRoleForm");
+      const saveBtn = document.getElementById("saveBtn");
+
+      // ✅ Extraer ID desde la URL real del navegador
+      const pathParts = window.location.pathname.split("/");
+      const roleId = pathParts[pathParts.length - 1];
+
+      console.log("🟢 Cargando rol con ID:", roleId);
+
+      // ✅ Función para cargar datos del rol
+      async function loadRole() {
+        try {
+          const response = await fetch(`http://localhost:8000/api/roles/${roleId}`);
+          if (!response.ok) throw new Error(`Error HTTP ${response.status}`);
+          const data = await response.json();
+
+          console.log("✅ Datos recibidos:", data);
+
+          form.roleName.value = data.descripcion || "";
+          form.status.value = data.estado?.toString() || "1";
+        } catch (error) {
+          console.error("❌ Error al cargar los datos del rol:", error);
+          alert("Error al cargar los datos del rol: " + error.message);
+        }
+      }
+
+      // ✅ Guardar cambios
+      saveBtn.addEventListener("click", async () => {
+        const data = {
+          descripcion: form.roleName.value.trim(),
+          estado: parseInt(form.status.value),
+        };
+
+        if (!data.descripcion) {
+          alert("La descripción del rol es obligatoria.");
+          return;
+        }
+
+        try {
+          const res = await fetch(`http://localhost:8000/api/roles/${roleId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          });
+
+          const result = await res.json();
+          console.log("📨 Respuesta del servidor:", result);
+
+          if (res.ok) {
+            alert("✅ Rol actualizado correctamente.");
+            window.location.href = "/roles-permissions/roles/list";
+          } else {
+            alert("❌ Error: " + (result.message || "No se pudo actualizar el rol."));
+          }
+        } catch (error) {
+          console.error("❌ Error de conexión:", error);
+          alert("Error de conexión con el servidor.");
+        }
+      });
+
+      // Ejecutar carga inicial
+      loadRole();
+    });
+  </script>
+</AdminLayout>
