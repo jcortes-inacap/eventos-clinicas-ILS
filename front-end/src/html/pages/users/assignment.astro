@@ -1,0 +1,612 @@
+---
+import AdminLayout from '../../layouts/admin/admin-layout.astro'
+import PageHeader from '../../components/common/page-header.astro'
+import type { Props as PageHeaderProps } from '../../components/common/page-header.astro'
+import { getAssetPrefix, getPathPrefix } from '../../../utils/path.js'
+import { ApiService } from '../../../services/api.js'
+
+// Obtener datos reales desde la API
+let usuarios = [];
+let roles = [];
+let carreras = [];
+let hasError = false;
+
+try {
+  [usuarios, roles, carreras] = await Promise.all([
+    ApiService.getUsuarios(),
+    ApiService.getRoles(),
+    ApiService.getCarreras()
+  ]);
+} catch (error) {
+  console.error('Error fetching data:', error);
+  hasError = true;
+}
+
+const assignmentPageConfig: PageHeaderProps = {
+  title: 'Assignments Settings',
+  breadcrumbs: [
+    { label: 'Dashboard', href: getPathPrefix('/dashboard'), class: '' },
+    { label: 'Users Assignments', class: 'active' }
+  ]
+}
+---
+
+<AdminLayout
+  title="Gestión de Usuarios"
+  description="Administración de usuarios del sistema"
+  currentPath="/users/assignment"
+>
+  <PageHeader {...assignmentPageConfig} />
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">Lista de Usuarios</h5>
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+            <i class="ri-user-add-line me-1"></i>
+            Nuevo Usuario
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-md-6" style="margin-bottom:1rem">
+              <div class="input-group">
+                <span class="input-group-text">
+                  <i class="ri-search-line"></i>
+                </span>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="searchInput"
+                  placeholder="Buscar por nombre..."
+                >
+              </div>
+            </div>
+            <div class="col-md-6 text-end">
+              <button class="btn btn-outline-primary" id="sortButton">
+                <i class="ri-sort-alpha-asc"></i> Ordenar A-Z
+              </button>
+            </div>
+          </div>
+
+          {hasError ? (
+            <div class="alert alert-warning">
+              <div class="d-flex align-items-center">
+                <i class="ri-wifi-off-line me-2 fs-4"></i>
+                <div>
+                  <strong>Error de conexión</strong><br>
+                  <small>No se pudieron cargar los usuarios. Verifique su conexión e intente nuevamente.</small>
+                </div>
+              </div>
+            </div>
+          ) : usuarios.length === 0 ? (
+            <div class="d-flex justify-content-center align-items-center" style="min-height: 200px;">
+              <div class="text-center">
+                <div class="spinner-border text-primary mb-3" role="status">
+                  <span class="visually-hidden">Cargando...</span>
+                </div>
+                <p class="text-muted">Cargando usuarios...</p>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Usuario</th>
+                      <th style="text-align:center">Rol</th>
+                      <th style="text-align:center">Carrera</th>
+                      <th class="text-end">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody id="usersTableBody">
+                    {usuarios.map(u => (
+                      <tr data-user-id={u.id_usuarios}>
+                        <td>{u.nombre} <span style="font-style:italic">{u.apellidos}</span></td>
+                        <td>
+                          {u.usuario}
+                          <button
+                            class="btn btn-sm btn-outline-secondary ms-2 copy-email"
+                            data-email={u.usuario}
+                            title="Copiar correo">
+                            <i class="ri-file-copy-line"></i> Copiar
+                          </button>
+                        </td>
+                        <td style="text-align:center">
+                          <span class="badge bg-primary">{u.rol?.descripcion || '—'}</span>
+                        </td>
+                        <td style="text-align:center">{u.carrera?.descripcion || '—'}</td>
+                        <td class="text-end">
+                          <button class="btn btn-sm btn-light me-2 edit-user"
+                                  data-user-id={u.id_usuarios}
+                                  data-bs-toggle="modal"
+                                  data-bs-target="#editUserModal">
+                            <i class="ri-edit-line"></i>
+                          </button>
+                          <button class="btn btn-sm btn-danger delete-user"
+                                  data-user-id={u.id_usuarios}
+                                  data-user-name={`${u.nombre} ${u.apellidos}`}>
+                            <i class="ri-delete-bin-line"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Paginador -->
+              <nav aria-label="Paginación de usuarios">
+                <ul class="pagination justify-content-center" id="pagination">
+                  <!-- Se genera dinámicamente -->
+                </ul>
+              </nav>
+
+              <!-- Info de paginación -->
+              <div class="text-center text-muted mt-2">
+                <small id="paginationInfo">Mostrando 1-10 de X usuarios</small>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Editar Usuario -->
+  <div class="modal fade" id="editUserModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Editar Usuario</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="editModalBody">
+          <!-- El contenido se carga dinámicamente -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="saveChangesBtn">Guardar cambios</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de confirmación para eliminar -->
+  <div class="modal fade" id="deleteConfirmModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title text-danger">
+            <i class="ri-error-warning-line me-2"></i>
+            Confirmar Eliminación
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p>¿Está seguro que desea eliminar al usuario <strong id="deleteUserName"></strong>?</p>
+          <div class="alert alert-warning">
+            <small><i class="ri-information-line me-1"></i>Esta acción no se puede deshacer.</small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+            <i class="ri-delete-bin-line me-1"></i>
+            Sí, eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script inline -->
+  <script type="module" define:vars={{ roles, carreras }}>
+    import { ApiService } from '/src/services/api.js';
+
+      // Variables globales
+      let currentUserId = null;
+      let userToDelete = null;
+      let currentPage = 1;
+      const itemsPerPage = 10;
+      let filteredRows = [];
+
+      const tableBody = document.getElementById('usersTableBody');
+      const allRows = [...tableBody.querySelectorAll('tr')];
+
+      // Funciones de utilidad para UX
+      const showLoading = (element, text = 'Cargando...') => {
+        element.innerHTML = `
+          <div class="d-flex align-items-center justify-content-center" style="min-height: 200px;">
+            <div class="text-center">
+              <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+              <p class="mb-0">${text}</p>
+            </div>
+          </div>
+        `;
+      };
+
+      const toggleFormInputs = (disabled) => {
+        const inputs = document.querySelectorAll('#editUserModal input, #editUserModal select');
+        inputs.forEach(input => {
+          input.disabled = disabled;
+        });
+      };
+
+      const toggleSaveButton = (disabled, text = 'Guardar cambios') => {
+        const saveBtn = document.getElementById('saveChangesBtn');
+        if (saveBtn) {
+          saveBtn.disabled = disabled;
+          if (disabled && text === 'Guardando...') {
+            saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Guardando...';
+          } else {
+            saveBtn.innerHTML = text;
+          }
+        }
+      };
+
+      // Función para mostrar alerta de éxito
+      const showSuccessAlert = (message, callback) => {
+        const alertHtml = `
+          <div class="modal fade" id="successModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                  <h5 class="modal-title">
+                    <i class="ri-check-circle-line me-2"></i>
+                    Éxito
+                  </h5>
+                </div>
+                <div class="modal-body">
+                  <p class="mb-0">${message}</p>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-success" data-bs-dismiss="modal">Aceptar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', alertHtml);
+        const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+
+        document.getElementById('successModal').addEventListener('hidden.bs.modal', () => {
+          document.getElementById('successModal').remove();
+          if (callback) callback();
+        });
+
+        successModal.show();
+      };
+
+      const createFormHTML = () => {
+        const rolesOptions = roles.map(r =>
+          `<option value="${r.id_roles}">${r.descripcion}</option>`
+        ).join('');
+
+        const carrerasOptions = carreras.map(c =>
+          `<option value="${c.id_carrera}">${c.descripcion}</option>`
+        ).join('');
+
+        return `
+          <form>
+            <div class="mb-3">
+              <label class="form-label">Nombre</label>
+              <input type="text" class="form-control" id="editNombre" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Apellidos</label>
+              <input type="text" class="form-control" id="editApellidos" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Rol</label>
+              <select class="form-select" id="editRol">
+                ${rolesOptions}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Carrera</label>
+              <select class="form-select" id="editCarrera">
+                <option value="">— Ninguna —</option>
+                ${carrerasOptions}
+              </select>
+            </div>
+          </form>
+        `;
+      };
+
+      // Función para limpiar el backdrop y resetear modales
+      const cleanupModal = () => {
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) {
+          backdrop.remove();
+        }
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+      };
+
+      // Función de paginación
+      const updatePagination = () => {
+        const totalPages = Math.ceil(filteredRows.length / itemsPerPage);
+        const pagination = document.getElementById('pagination');
+        const paginationInfo = document.getElementById('paginationInfo');
+
+        if (totalPages <= 1) {
+          pagination.innerHTML = '';
+          paginationInfo.textContent = `Mostrando ${filteredRows.length} usuarios`;
+          return;
+        }
+
+        let paginationHTML = '';
+
+        // Botón anterior
+        paginationHTML += `
+          <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+            <a class="page-link" href="#" data-page="${currentPage - 1}">
+              <i class="ri-arrow-left-line"></i>
+            </a>
+          </li>
+        `;
+
+        // Números de página
+        for (let i = 1; i <= totalPages; i++) {
+          paginationHTML += `
+            <li class="page-item ${i === currentPage ? 'active' : ''}">
+              <a class="page-link" href="#" data-page="${i}">${i}</a>
+            </li>
+          `;
+        }
+
+        // Botón siguiente
+        paginationHTML += `
+          <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+            <a class="page-link" href="#" data-page="${currentPage + 1}">
+              <i class="ri-arrow-right-line"></i>
+            </a>
+          </li>
+        `;
+
+        pagination.innerHTML = paginationHTML;
+
+        // Info de paginación
+        const startItem = (currentPage - 1) * itemsPerPage + 1;
+        const endItem = Math.min(currentPage * itemsPerPage, filteredRows.length);
+        paginationInfo.textContent = `Mostrando ${startItem}-${endItem} de ${filteredRows.length} usuarios`;
+      };
+
+      const showPage = (page) => {
+        currentPage = page;
+        const startIndex = (page - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+
+        // Ocultar todas las filas
+        allRows.forEach(row => row.style.display = 'none');
+
+        // Mostrar filas de la página actual
+        filteredRows.slice(startIndex, endIndex).forEach(row => {
+          row.style.display = '';
+        });
+
+        updatePagination();
+      };
+
+      // Inicializar paginación
+      filteredRows = [...allRows];
+      showPage(1);
+
+      // Event listeners para paginación
+      document.addEventListener('click', function(e) {
+        if (e.target.closest('.page-link')) {
+          e.preventDefault();
+          const page = parseInt(e.target.closest('.page-link').dataset.page);
+          if (page && page !== currentPage && page >= 1 && page <= Math.ceil(filteredRows.length / itemsPerPage)) {
+            showPage(page);
+          }
+        }
+      });
+
+      // Manejadores de modal
+      const modalCancelButtons = document.querySelectorAll('[data-bs-dismiss="modal"]');
+      modalCancelButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          cleanupModal();
+        });
+      });
+
+      const modals = document.querySelectorAll('.modal');
+      modals.forEach(modal => {
+        modal.addEventListener('hidden.bs.modal', () => {
+          cleanupModal();
+          toggleFormInputs(false);
+          toggleSaveButton(false);
+        });
+      });
+
+      // Lógica para el modal de edición
+      const editModal = document.getElementById('editUserModal');
+      const editButtons = document.querySelectorAll('.edit-user');
+
+      editButtons.forEach(button => {
+        button.addEventListener('click', async function() {
+          currentUserId = this.getAttribute('data-user-id');
+
+          const modal = new bootstrap.Modal(editModal);
+          modal.show();
+
+          const modalBody = document.getElementById('editModalBody');
+          showLoading(modalBody, 'Cargando datos del usuario...');
+          toggleSaveButton(true, 'Cargando...');
+
+          try {
+            const usuario = await ApiService.getUsuario(currentUserId);
+
+            modalBody.innerHTML = createFormHTML();
+
+            document.getElementById('editNombre').value = usuario.nombre || '';
+            document.getElementById('editApellidos').value = usuario.apellidos || '';
+            document.getElementById('editRol').value = usuario.id_roles || '';
+            document.getElementById('editCarrera').value = usuario.id_carrera || '';
+
+            toggleSaveButton(false);
+
+          } catch (error) {
+            console.error('Error loading user data:', error);
+            modalBody.innerHTML = `
+              <div class="alert alert-danger">
+                <i class="ri-error-warning-line me-2"></i>
+                Error al cargar los datos del usuario. Por favor, intente nuevamente.
+              </div>
+            `;
+            toggleSaveButton(true, 'Error');
+          }
+        });
+      });
+
+      // Manejador para guardar cambios
+      document.addEventListener('click', async function(e) {
+        if (e.target && e.target.id === 'saveChangesBtn') {
+          if (!currentUserId) return;
+
+          toggleFormInputs(true);
+          toggleSaveButton(true, 'Guardando...');
+
+          const formData = {
+            nombre: document.getElementById('editNombre').value,
+            apellidos: document.getElementById('editApellidos').value,
+            id_roles: parseInt(document.getElementById('editRol').value),
+            id_carrera: document.getElementById('editCarrera').value ?
+                       parseInt(document.getElementById('editCarrera').value) : null,
+          };
+
+          try {
+            await ApiService.updateUsuario(currentUserId, formData);
+
+            toggleSaveButton(true, '¡Guardado!');
+
+            setTimeout(() => {
+              const modal = bootstrap.Modal.getInstance(editModal);
+              modal.hide();
+
+              // Mostrar alerta de éxito
+              showSuccessAlert('Usuario modificado con éxito', () => {
+                window.location.reload();
+              });
+            }, 500);
+
+          } catch (error) {
+            console.error('Error updating user:', error);
+
+            toggleFormInputs(false);
+            toggleSaveButton(false);
+
+            alert('Error al actualizar el usuario. Por favor, intente nuevamente.');
+          }
+        }
+
+        // Manejador para eliminar usuario
+        if (e.target.closest('.delete-user')) {
+          const button = e.target.closest('.delete-user');
+          userToDelete = {
+            id: button.dataset.userId,
+            name: button.dataset.userName
+          };
+
+          document.getElementById('deleteUserName').textContent = userToDelete.name;
+          const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+          deleteModal.show();
+        }
+
+        // Confirmar eliminación
+        if (e.target && e.target.id === 'confirmDeleteBtn') {
+          if (!userToDelete) return;
+
+          const originalText = e.target.innerHTML;
+          e.target.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Eliminando...';
+          e.target.disabled = true;
+
+          try {
+            await ApiService.deleteUsuario(userToDelete.id);
+
+            const deleteModal = bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal'));
+            deleteModal.hide();
+
+            showSuccessAlert('Usuario eliminado con éxito', () => {
+              window.location.reload();
+            });
+
+          } catch (error) {
+            console.error('Error deleting user:', error);
+            e.target.innerHTML = originalText;
+            e.target.disabled = false;
+            alert('Error al eliminar el usuario. Por favor, intente nuevamente.');
+          }
+        }
+      });
+
+      // Funcionalidad de copiar correo
+      document.querySelectorAll('.copy-email').forEach(button => {
+        button.addEventListener('click', async function() {
+          const email = this.dataset.email;
+          const originalContent = this.innerHTML;
+
+          try {
+            await navigator.clipboard.writeText(email);
+            this.innerHTML = '<i class="ri-check-line"></i> Copiado';
+            this.disabled = true;
+
+            setTimeout(() => {
+              this.innerHTML = originalContent;
+              this.disabled = false;
+            }, 3000);
+          } catch (err) {
+            console.error('Error al copiar:', err);
+            alert('No se pudo copiar el correo');
+          }
+        });
+      });
+
+      // Funcionalidad de búsqueda
+      const searchInput = document.getElementById('searchInput');
+
+      searchInput.addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+
+        filteredRows = allRows.filter(row => {
+          const name = row.querySelector('td:first-child').textContent.toLowerCase();
+          const email = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+          return name.includes(searchTerm) || email.includes(searchTerm);
+        });
+
+        currentPage = 1;
+        showPage(1);
+      });
+
+      // Funcionalidad de ordenamiento
+      const sortButton = document.getElementById('sortButton');
+      let isAscending = true;
+
+      sortButton.addEventListener('click', function() {
+        filteredRows.sort((a, b) => {
+          const nameA = a.querySelector('td:first-child').textContent.toLowerCase();
+          const nameB = b.querySelector('td:first-child').textContent.toLowerCase();
+
+          return isAscending
+            ? nameA.localeCompare(nameB)
+            : nameB.localeCompare(nameA);
+        });
+
+        // Actualizar botón
+        isAscending = !isAscending;
+        this.innerHTML = isAscending
+          ? '<i class="ri-sort-alpha-asc"></i> Ordenar A-Z'
+          : '<i class="ri-sort-alpha-desc"></i> Ordenar Z-A';
+
+        showPage(currentPage);
+      });
+
+  </script>
+</AdminLayout>

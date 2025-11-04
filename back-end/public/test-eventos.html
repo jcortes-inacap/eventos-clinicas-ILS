@@ -1,0 +1,836 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Prueba CRUD Eventos - Sistema de Eventos ILS</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 20px;
+                min-height: 100vh;
+            }
+
+            .container {
+                max-width: 1400px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 15px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                overflow: hidden;
+            }
+
+            .header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 30px;
+                text-align: center;
+            }
+
+            .header h1 {
+                font-size: 2.5em;
+                margin-bottom: 10px;
+            }
+
+            .header p {
+                opacity: 0.9;
+                font-size: 1.1em;
+            }
+
+            .content {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+                padding: 30px;
+            }
+
+            .section {
+                background: #f8f9fa;
+                border-radius: 10px;
+                padding: 25px;
+                border: 2px solid #e9ecef;
+            }
+
+            .section h2 {
+                color: #667eea;
+                margin-bottom: 20px;
+                font-size: 1.5em;
+                border-bottom: 3px solid #667eea;
+                padding-bottom: 10px;
+            }
+
+            .form-group {
+                margin-bottom: 15px;
+            }
+
+            label {
+                display: block;
+                margin-bottom: 5px;
+                color: #495057;
+                font-weight: 600;
+                font-size: 0.9em;
+            }
+
+            input,
+            select,
+            textarea {
+                width: 100%;
+                padding: 12px;
+                border: 2px solid #dee2e6;
+                border-radius: 8px;
+                font-size: 14px;
+                transition: all 0.3s;
+            }
+
+            input:focus,
+            select:focus,
+            textarea:focus {
+                outline: none;
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
+
+            textarea {
+                resize: vertical;
+                min-height: 80px;
+            }
+
+            .btn {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 12px 25px;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: 600;
+                transition: all 0.3s;
+                width: 100%;
+                margin-top: 10px;
+            }
+
+            .btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            }
+
+            .btn:active {
+                transform: translateY(0);
+            }
+
+            .btn-success {
+                background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            }
+
+            .btn-warning {
+                background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+            }
+
+            .btn-danger {
+                background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            }
+
+            .btn-info {
+                background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            }
+
+            .btn-small {
+                padding: 8px 15px;
+                font-size: 12px;
+                margin: 5px;
+                width: auto;
+            }
+
+            #resultado {
+                background: #f8f9fa;
+                border-radius: 10px;
+                padding: 20px;
+                margin-top: 20px;
+                border: 2px solid #e9ecef;
+                max-height: 600px;
+                overflow-y: auto;
+            }
+
+            #resultado h3 {
+                color: #667eea;
+                margin-bottom: 15px;
+            }
+
+            pre {
+                background: #2d3748;
+                color: #68d391;
+                padding: 15px;
+                border-radius: 8px;
+                overflow-x: auto;
+                font-size: 13px;
+                line-height: 1.6;
+            }
+
+            .full-width {
+                grid-column: 1 / -1;
+            }
+
+            .evento-card {
+                background: white;
+                border: 2px solid #e9ecef;
+                border-radius: 8px;
+                padding: 15px;
+                margin-bottom: 15px;
+                transition: all 0.3s;
+            }
+
+            .evento-card:hover {
+                border-color: #667eea;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            }
+
+            .evento-card h4 {
+                color: #667eea;
+                margin-bottom: 10px;
+            }
+
+            .evento-info {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                margin: 10px 0;
+            }
+
+            .info-item {
+                background: #f8f9fa;
+                padding: 8px;
+                border-radius: 5px;
+                font-size: 13px;
+            }
+
+            .info-item strong {
+                color: #495057;
+            }
+
+            .badge {
+                display: inline-block;
+                padding: 5px 10px;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: 600;
+                margin: 5px 5px 5px 0;
+            }
+
+            .badge-publico {
+                background: #28a745;
+                color: white;
+            }
+
+            .badge-privado {
+                background: #dc3545;
+                color: white;
+            }
+
+            .badge-interno {
+                background: #ffc107;
+                color: #212529;
+            }
+
+            .badge-presencial {
+                background: #17a2b8;
+                color: white;
+            }
+
+            .badge-online {
+                background: #6f42c1;
+                color: white;
+            }
+
+            .badge-hibrida {
+                background: #fd7e14;
+                color: white;
+            }
+
+            .alert {
+                padding: 15px;
+                border-radius: 8px;
+                margin-bottom: 15px;
+            }
+
+            .alert-success {
+                background: #d4edda;
+                border: 2px solid #c3e6cb;
+                color: #155724;
+            }
+
+            .alert-error {
+                background: #f8d7da;
+                border: 2px solid #f5c6cb;
+                color: #721c24;
+            }
+
+            .loading {
+                display: none;
+                text-align: center;
+                padding: 20px;
+            }
+
+            .loading.active {
+                display: block;
+            }
+
+            .spinner {
+                border: 4px solid #f3f3f3;
+                border-top: 4px solid #667eea;
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                animation: spin 1s linear infinite;
+                margin: 0 auto;
+            }
+
+            @keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+
+            .config-section {
+                background: #fff3cd;
+                border: 2px solid #ffc107;
+                border-radius: 8px;
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+
+            .config-section h3 {
+                color: #856404;
+                margin-bottom: 10px;
+            }
+
+            @media (max-width: 768px) {
+                .content {
+                    grid-template-columns: 1fr;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>🎯 Sistema de Gestión de Eventos</h1>
+                <p>Prueba completa del CRUD - Instituto INACAP La Serena</p>
+            </div>
+
+            <div class="content">
+                <!-- Configuración de API -->
+                <div class="section full-width">
+                    <div class="config-section">
+                        <h3>⚙️ Configuración de API</h3>
+                        <div class="form-group">
+                            <label>URL Base de la API:</label>
+                            <input type="text" id="apiUrl" value="http://localhost:8000/api" />
+                            <small style="display: block; margin-top: 5px; color: #856404">
+                                Por defecto: http://localhost:8000/api (Cambiar si es necesario)
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 1. LISTAR TODOS LOS EVENTOS -->
+                <div class="section">
+                    <h2>📋 1. Listar Todos los Eventos</h2>
+                    <button class="btn btn-info" onclick="listarEventos()">Cargar Eventos</button>
+                    <button class="btn btn-small btn-success" onclick="filtrarPorVisibilidad('publico')">Públicos</button>
+                    <button class="btn btn-small btn-warning" onclick="filtrarPorVisibilidad('privado')">Privados</button>
+                    <button class="btn btn-small btn-info" onclick="filtrarPorVisibilidad('interno')">Internos</button>
+                </div>
+
+                <!-- 2. VER UN EVENTO ESPECÍFICO -->
+                <div class="section">
+                    <h2>🔍 2. Ver Evento Específico</h2>
+                    <div class="form-group">
+                        <label>ID del Evento:</label>
+                        <input type="number" id="idVerEvento" placeholder="Ej: 1" />
+                    </div>
+                    <button class="btn btn-info" onclick="verEvento()">Ver Evento</button>
+                </div>
+
+                <!-- 3. CREAR NUEVO EVENTO -->
+                <div class="section">
+                    <h2>➕ 3. Crear Nuevo Evento</h2>
+                    <div class="form-group">
+                        <label>Título *:</label>
+                        <input type="text" id="nuevoTitulo" placeholder="Ej: Charla de Tecnología" />
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción:</label>
+                        <textarea id="nuevoDescripcion" placeholder="Descripción del evento..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Visibilidad *:</label>
+                        <select id="nuevoVisibilidad">
+                            <option value="publico">Público</option>
+                            <option value="privado">Privado</option>
+                            <option value="interno">Interno</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Modalidad *:</label>
+                        <select id="nuevoModalidad">
+                            <option value="presencial">Presencial</option>
+                            <option value="online">Online</option>
+                            <option value="hibrida">Híbrida</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Duración (minutos):</label>
+                        <input type="number" id="nuevoDuracion" placeholder="Ej: 120" />
+                    </div>
+                    <div class="form-group">
+                        <label>ID Usuario (Creador) *:</label>
+                        <input type="number" id="nuevoIdUsuario" placeholder="Ej: 1" />
+                    </div>
+                    <div class="form-group">
+                        <label>ID Lugar:</label>
+                        <input type="number" id="nuevoIdLugar" placeholder="Ej: 1" />
+                    </div>
+                    <div class="form-group">
+                        <label>Requiere Estacionamiento:</label>
+                        <select id="nuevoEstacionamiento">
+                            <option value="false">No</option>
+                            <option value="true">Sí</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-success" onclick="crearEvento()">Crear Evento</button>
+                </div>
+
+                <!-- 4. ACTUALIZAR EVENTO -->
+                <div class="section">
+                    <h2>✏️ 4. Actualizar Evento</h2>
+                    <div class="form-group">
+                        <label>ID del Evento a Actualizar *:</label>
+                        <input type="number" id="idActualizar" placeholder="Ej: 1" />
+                    </div>
+                    <div class="form-group">
+                        <label>Nuevo Título:</label>
+                        <input type="text" id="actualizarTitulo" placeholder="Dejar vacío para no cambiar" />
+                    </div>
+                    <div class="form-group">
+                        <label>Nueva Descripción:</label>
+                        <textarea id="actualizarDescripcion" placeholder="Dejar vacío para no cambiar"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Nueva Visibilidad:</label>
+                        <select id="actualizarVisibilidad">
+                            <option value="">-- No cambiar --</option>
+                            <option value="publico">Público</option>
+                            <option value="privado">Privado</option>
+                            <option value="interno">Interno</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Nueva Modalidad:</label>
+                        <select id="actualizarModalidad">
+                            <option value="">-- No cambiar --</option>
+                            <option value="presencial">Presencial</option>
+                            <option value="online">Online</option>
+                            <option value="hibrida">Híbrida</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-warning" onclick="actualizarEvento()">Actualizar Evento</button>
+                </div>
+
+                <!-- 5. ELIMINAR EVENTO -->
+                <div class="section">
+                    <h2>🗑️ 5. Eliminar Evento</h2>
+                    <div class="form-group">
+                        <label>ID del Evento a Eliminar:</label>
+                        <input type="number" id="idEliminar" placeholder="Ej: 1" />
+                    </div>
+                    <button class="btn btn-danger" onclick="eliminarEvento()">Eliminar Evento</button>
+                </div>
+
+                <!-- 6. FILTROS ADICIONALES -->
+                <div class="section">
+                    <h2>🔎 6. Filtros Adicionales</h2>
+                    <div class="form-group">
+                        <label>Filtrar por Modalidad:</label>
+                        <select id="filtroModalidad">
+                            <option value="presencial">Presencial</option>
+                            <option value="online">Online</option>
+                            <option value="hibrida">Híbrida</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-info" onclick="filtrarPorModalidadSelect()">Aplicar Filtro</button>
+                    <hr style="margin: 20px 0" />
+                    <div class="form-group">
+                        <label>Ver Eventos de Usuario (ID):</label>
+                        <input type="number" id="filtroUsuario" placeholder="Ej: 1" />
+                    </div>
+                    <button class="btn btn-info" onclick="misEventos()">Ver Mis Eventos</button>
+                </div>
+
+                <!-- RESULTADO -->
+                <div class="section full-width">
+                    <div id="resultado">
+                        <h3>📊 Resultado</h3>
+                        <div class="loading" id="loading">
+                            <div class="spinner"></div>
+                            <p style="margin-top: 10px; color: #667eea">Cargando...</p>
+                        </div>
+                        <div id="resultadoContenido">
+                            <p style="color: #6c757d; text-align: center; padding: 40px">Los resultados aparecerán aquí...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Función para obtener la URL base de la API
+            function getApiUrl() {
+                return document.getElementById('apiUrl').value.trim();
+            }
+
+            // Función auxiliar para mostrar loading
+            function mostrarLoading(mostrar) {
+                const loading = document.getElementById('loading');
+                const contenido = document.getElementById('resultadoContenido');
+                if (mostrar) {
+                    loading.classList.add('active');
+                    contenido.style.display = 'none';
+                } else {
+                    loading.classList.remove('active');
+                    contenido.style.display = 'block';
+                }
+            }
+
+            // Función auxiliar para mostrar resultados
+            function mostrarResultado(tipo, titulo, datos) {
+                const resultado = document.getElementById('resultadoContenido');
+
+                let html = `
+                <div class="alert ${tipo === 'error' ? 'alert-error' : 'alert-success'}">
+                    <strong>${titulo}</strong>
+                </div>
+            `;
+
+                if (tipo === 'eventos' && Array.isArray(datos)) {
+                    html += `<h4 style="margin-bottom: 15px;">Total de eventos: ${datos.length}</h4>`;
+                    datos.forEach((evento) => {
+                        html += renderizarEventoCard(evento);
+                    });
+                } else if (tipo === 'evento' && datos) {
+                    html += renderizarEventoCard(datos);
+                } else {
+                    html += `<pre>${JSON.stringify(datos, null, 2)}</pre>`;
+                }
+
+                resultado.innerHTML = html;
+            }
+
+            // Función para renderizar una tarjeta de evento
+            function renderizarEventoCard(evento) {
+                return `
+                <div class="evento-card">
+                    <h4>🎯 ${evento.titulo || 'Sin título'}</h4>
+                    <div style="margin-bottom: 10px;">
+                        <span class="badge badge-${evento.visibilidad}">${evento.visibilidad?.toUpperCase() || 'N/A'}</span>
+                        <span class="badge badge-${evento.modalidad}">${evento.modalidad?.toUpperCase() || 'N/A'}</span>
+                    </div>
+                    <div class="evento-info">
+                        <div class="info-item">
+                            <strong>ID:</strong> ${evento.id_evento || 'N/A'}
+                        </div>
+                        <div class="info-item">
+                            <strong>Duración:</strong> ${evento.duracion ? evento.duracion + ' min' : 'N/A'}
+                        </div>
+                        <div class="info-item">
+                            <strong>Estacionamiento:</strong> ${evento.requiere_estacionamiento ? 'Sí' : 'No'}
+                        </div>
+                        <div class="info-item">
+                            <strong>Creador:</strong> ${evento.usuario ? evento.usuario.nombre + ' ' + evento.usuario.apellidos : 'N/A'}
+                        </div>
+                        <div class="info-item" style="grid-column: 1 / -1;">
+                            <strong>Lugar:</strong> ${evento.lugar ? evento.lugar.nombre || evento.lugar.tipo : 'No especificado'}
+                        </div>
+                        <div class="info-item" style="grid-column: 1 / -1;">
+                            <strong>Descripción:</strong> ${evento.descripcion || 'Sin descripción'}
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <button class="btn btn-small btn-info" onclick="verEvento(${evento.id_evento})">Ver Detalles</button>
+                        <button class="btn btn-small btn-danger" onclick="eliminarEvento(${evento.id_evento})">Eliminar</button>
+                    </div>
+                </div>
+            `;
+            }
+
+            // 1. LISTAR TODOS LOS EVENTOS
+            async function listarEventos() {
+                mostrarLoading(true);
+                try {
+                    const response = await fetch(`${getApiUrl()}/eventos`);
+                    const data = await response.json();
+
+                    mostrarLoading(false);
+                    if (response.ok) {
+                        mostrarResultado('eventos', '✅ Eventos cargados exitosamente', data.data || []);
+                    } else {
+                        mostrarResultado('error', '❌ Error al cargar eventos', data);
+                    }
+                } catch (error) {
+                    mostrarLoading(false);
+                    mostrarResultado('error', '❌ Error de conexión', { error: error.message });
+                }
+            }
+
+            // 2. VER UN EVENTO ESPECÍFICO
+            async function verEvento(id = null) {
+                const idEvento = id || document.getElementById('idVerEvento').value;
+                if (!idEvento) {
+                    alert('Por favor ingresa un ID de evento');
+                    return;
+                }
+
+                mostrarLoading(true);
+                try {
+                    const response = await fetch(`${getApiUrl()}/eventos/${idEvento}`);
+                    const data = await response.json();
+
+                    mostrarLoading(false);
+                    if (response.ok) {
+                        mostrarResultado('evento', `✅ Evento #${idEvento} encontrado`, data.data);
+                    } else {
+                        mostrarResultado('error', '❌ Error al buscar evento', data);
+                    }
+                } catch (error) {
+                    mostrarLoading(false);
+                    mostrarResultado('error', '❌ Error de conexión', { error: error.message });
+                }
+            }
+
+            // 3. CREAR NUEVO EVENTO
+            async function crearEvento() {
+                const titulo = document.getElementById('nuevoTitulo').value;
+                const descripcion = document.getElementById('nuevoDescripcion').value;
+                const visibilidad = document.getElementById('nuevoVisibilidad').value;
+                const modalidad = document.getElementById('nuevoModalidad').value;
+                const duracion = document.getElementById('nuevoDuracion').value;
+                const id_usuarios = document.getElementById('nuevoIdUsuario').value;
+                const id_lugar = document.getElementById('nuevoIdLugar').value;
+                const requiere_estacionamiento = document.getElementById('nuevoEstacionamiento').value === 'true';
+
+                if (!titulo || !visibilidad || !modalidad || !id_usuarios) {
+                    alert('Por favor completa los campos obligatorios (*)');
+                    return;
+                }
+
+                const nuevoEvento = {
+                    titulo,
+                    visibilidad,
+                    modalidad,
+                    id_usuarios: parseInt(id_usuarios),
+                };
+
+                if (descripcion) nuevoEvento.descripcion = descripcion;
+                if (duracion) nuevoEvento.duracion = parseInt(duracion);
+                if (id_lugar) nuevoEvento.id_lugar = parseInt(id_lugar);
+                nuevoEvento.requiere_estacionamiento = requiere_estacionamiento;
+
+                mostrarLoading(true);
+                try {
+                    const response = await fetch(`${getApiUrl()}/eventos`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Accept: 'application/json',
+                        },
+                        body: JSON.stringify(nuevoEvento),
+                    });
+                    const data = await response.json();
+
+                    mostrarLoading(false);
+                    if (response.ok) {
+                        mostrarResultado('evento', '✅ Evento creado exitosamente', data.data);
+                        // Limpiar formulario
+                        document.getElementById('nuevoTitulo').value = '';
+                        document.getElementById('nuevoDescripcion').value = '';
+                        document.getElementById('nuevoDuracion').value = '';
+                        document.getElementById('nuevoIdLugar').value = '';
+                    } else {
+                        mostrarResultado('error', '❌ Error al crear evento', data);
+                    }
+                } catch (error) {
+                    mostrarLoading(false);
+                    mostrarResultado('error', '❌ Error de conexión', { error: error.message });
+                }
+            }
+
+            // 4. ACTUALIZAR EVENTO
+            async function actualizarEvento() {
+                const id = document.getElementById('idActualizar').value;
+                if (!id) {
+                    alert('Por favor ingresa el ID del evento a actualizar');
+                    return;
+                }
+
+                const actualizacion = {};
+
+                const titulo = document.getElementById('actualizarTitulo').value;
+                const descripcion = document.getElementById('actualizarDescripcion').value;
+                const visibilidad = document.getElementById('actualizarVisibilidad').value;
+                const modalidad = document.getElementById('actualizarModalidad').value;
+
+                if (titulo) actualizacion.titulo = titulo;
+                if (descripcion) actualizacion.descripcion = descripcion;
+                if (visibilidad) actualizacion.visibilidad = visibilidad;
+                if (modalidad) actualizacion.modalidad = modalidad;
+
+                if (Object.keys(actualizacion).length === 0) {
+                    alert('Por favor ingresa al menos un campo para actualizar');
+                    return;
+                }
+
+                mostrarLoading(true);
+                try {
+                    const response = await fetch(`${getApiUrl()}/eventos/${id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Accept: 'application/json',
+                        },
+                        body: JSON.stringify(actualizacion),
+                    });
+                    const data = await response.json();
+
+                    mostrarLoading(false);
+                    if (response.ok) {
+                        mostrarResultado('evento', `✅ Evento #${id} actualizado exitosamente`, data.data);
+                        // Limpiar formulario
+                        document.getElementById('actualizarTitulo').value = '';
+                        document.getElementById('actualizarDescripcion').value = '';
+                        document.getElementById('actualizarVisibilidad').value = '';
+                        document.getElementById('actualizarModalidad').value = '';
+                    } else {
+                        mostrarResultado('error', '❌ Error al actualizar evento', data);
+                    }
+                } catch (error) {
+                    mostrarLoading(false);
+                    mostrarResultado('error', '❌ Error de conexión', { error: error.message });
+                }
+            }
+
+            // 5. ELIMINAR EVENTO
+            async function eliminarEvento(id = null) {
+                const idEvento = id || document.getElementById('idEliminar').value;
+                if (!idEvento) {
+                    alert('Por favor ingresa un ID de evento');
+                    return;
+                }
+
+                if (!confirm(`¿Estás seguro de eliminar el evento #${idEvento}?`)) {
+                    return;
+                }
+
+                mostrarLoading(true);
+                try {
+                    const response = await fetch(`${getApiUrl()}/eventos/${idEvento}`, {
+                        method: 'DELETE',
+                        headers: {
+                            Accept: 'application/json',
+                        },
+                    });
+                    const data = await response.json();
+
+                    mostrarLoading(false);
+                    if (response.ok) {
+                        mostrarResultado('success', `✅ Evento #${idEvento} eliminado exitosamente`, data);
+                        document.getElementById('idEliminar').value = '';
+                    } else {
+                        mostrarResultado('error', '❌ Error al eliminar evento', data);
+                    }
+                } catch (error) {
+                    mostrarLoading(false);
+                    mostrarResultado('error', '❌ Error de conexión', { error: error.message });
+                }
+            }
+
+            // 6. FILTRAR POR VISIBILIDAD
+            async function filtrarPorVisibilidad(tipo) {
+                mostrarLoading(true);
+                try {
+                    const response = await fetch(`${getApiUrl()}/eventos/filtrar/visibilidad/${tipo}`);
+                    const data = await response.json();
+
+                    mostrarLoading(false);
+                    if (response.ok) {
+                        mostrarResultado('eventos', `✅ Eventos ${tipo}s encontrados`, data.data || []);
+                    } else {
+                        mostrarResultado('error', '❌ Error al filtrar eventos', data);
+                    }
+                } catch (error) {
+                    mostrarLoading(false);
+                    mostrarResultado('error', '❌ Error de conexión', { error: error.message });
+                }
+            }
+
+            // 7. FILTRAR POR MODALIDAD
+            async function filtrarPorModalidadSelect() {
+                const modalidad = document.getElementById('filtroModalidad').value;
+                mostrarLoading(true);
+                try {
+                    const response = await fetch(`${getApiUrl()}/eventos/filtrar/modalidad/${modalidad}`);
+                    const data = await response.json();
+
+                    mostrarLoading(false);
+                    if (response.ok) {
+                        mostrarResultado('eventos', `✅ Eventos en modalidad ${modalidad} encontrados`, data.data || []);
+                    } else {
+                        mostrarResultado('error', '❌ Error al filtrar eventos', data);
+                    }
+                } catch (error) {
+                    mostrarLoading(false);
+                    mostrarResultado('error', '❌ Error de conexión', { error: error.message });
+                }
+            }
+
+            // 8. MIS EVENTOS
+            async function misEventos() {
+                const idUsuario = document.getElementById('filtroUsuario').value;
+                if (!idUsuario) {
+                    alert('Por favor ingresa un ID de usuario');
+                    return;
+                }
+
+                mostrarLoading(true);
+                try {
+                    const response = await fetch(`${getApiUrl()}/eventos/mis-eventos/${idUsuario}`);
+                    const data = await response.json();
+
+                    mostrarLoading(false);
+                    if (response.ok) {
+                        mostrarResultado('eventos', `✅ Eventos del usuario #${idUsuario}`, data.data || []);
+                    } else {
+                        mostrarResultado('error', '❌ Error al buscar eventos del usuario', data);
+                    }
+                } catch (error) {
+                    mostrarLoading(false);
+                    mostrarResultado('error', '❌ Error de conexión', { error: error.message });
+                }
+            }
+
+            // Cargar eventos al iniciar la página
+            window.addEventListener('load', () => {
+                console.log('🎯 Sistema de Gestión de Eventos - Listo para usar');
+                console.log('📡 API URL:', getApiUrl());
+            });
+        </script>
+    </body>
+</html>

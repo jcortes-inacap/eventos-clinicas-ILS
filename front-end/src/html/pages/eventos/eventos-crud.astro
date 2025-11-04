@@ -1,0 +1,1013 @@
+---
+import AdminLayout from '../../layouts/admin/admin-layout.astro'
+import PageHeader from '../../components/common/page-header.astro'
+import type { Props as PageHeaderProps } from '../../components/common/page-header.astro'
+import { getPathPrefix } from '../../../utils/path.js'
+import { ApiService } from '../../../services/api.js'
+
+// Obtener datos reales desde la API
+let eventos = []
+let hasError = false
+
+try {
+  const response = await ApiService.getEventos()
+  eventos = response.data || []
+} catch (error) {
+  console.error('Error fetching eventos:', error)
+  hasError = true
+}
+
+const eventosPageConfig: PageHeaderProps = {
+  title: 'Gestión de Eventos',
+  breadcrumbs: [
+    { label: 'Dashboard', href: getPathPrefix('/dashboard'), class: '' },
+    { label: 'Other Pages', class: '' },
+    { label: 'Eventos CRUD', class: 'active' }
+  ]
+}
+---
+
+<AdminLayout
+  title="Gestión de Eventos"
+  description="Administración de eventos del sistema"
+  currentPath="/others/eventos-crud"
+>
+  <PageHeader {...eventosPageConfig} />
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">Lista de Eventos</h5>
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEventoModal">
+            <i class="ri-add-line me-1"></i> Nuevo Evento
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-md-8">
+              <div class="input-group">
+                <span class="input-group-text">
+                  <i class="ri-search-line"></i>
+                </span>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  id="searchInput" 
+                  placeholder="Buscar por título o descripción..."
+                >
+              </div>
+            </div>
+            <div class="col-md-4 text-end">
+              <button class="btn btn-outline-secondary" id="sortButton">
+                <i class="ri-sort-asc"></i> Ordenar A-Z
+              </button>
+            </div>
+          </div>
+
+          {hasError ? (
+            <div class="alert alert-danger" role="alert">
+              <i class="ri-error-warning-line me-2"></i>
+              Error al cargar los eventos. Por favor, intente nuevamente.
+            </div>
+          ) : eventos.length === 0 ? (
+            <div class="alert alert-info" role="alert">
+              <i class="ri-information-line me-2"></i>
+              No hay eventos registrados en el sistema.
+            </div>
+          ) : (
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead class="table">
+                  <tr>
+                    <th>Título</th>
+                    <th>Descripción</th>
+                    <th>Visibilidad</th>
+                    <th>Modalidad</th>
+                    <th>Duración</th>
+                    <th class="text-end">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="eventosTableBody">
+                  {eventos.map((evento, index) => (
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div>
+                            <div class="fw-medium">{evento.titulo}</div>
+                            <small class="text-muted">#{index + 1}</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <small class="text-muted">
+                          {evento.descripcion ? 
+                            (evento.descripcion.length > 50 ? 
+                              evento.descripcion.substring(0, 50) + '...' : 
+                              evento.descripcion) 
+                            : 'Sin descripción'}
+                        </small>
+                      </td>
+                      <td>
+                        <span class={`badge bg-${evento.visibilidad === 'publico' ? 'success' : evento.visibilidad === 'privado' ? 'danger' : 'warning'}`}>
+                          {evento.visibilidad?.toUpperCase()}
+                        </span>
+                      </td>
+                      <td>
+                        <span class={`badge bg-${evento.modalidad === 'presencial' ? 'info' : evento.modalidad === 'online' ? 'primary' : 'secondary'}`}>
+                          {evento.modalidad?.toUpperCase()}
+                        </span>
+                      </td>
+                      <td>{evento.duracion ? evento.duracion + ' min' : 'N/A'}</td>
+                      <td class="text-end">
+                          <button 
+                            class="btn btn-sm btn-light me-2 edit-evento" 
+                            data-evento-id={evento.id_evento}
+                            title="Editar"
+                          >
+                            <i class="ri-edit-line"></i>
+                          </button>
+                          <button 
+                            class="btn btn-sm btn-danger delete-evento" 
+                            data-evento-id={evento.id_evento}
+                            data-evento-titulo={evento.titulo}
+                            title="Eliminar"
+                          >
+                            <i class="ri-delete-bin-line"></i>
+                          </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          <div class="d-flex justify-content-between align-items-center mt-3">
+            <div>
+              <span id="paginationInfo" class="text-muted"></span>
+            </div>
+            <nav>
+              <ul class="pagination mb-0" id="pagination"></ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Agregar Evento -->
+  <div class="modal fade" id="addEventoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Nuevo Evento</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+  <form id="addEventoForm" novalidate>
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-12">
+                <label for="add_titulo" class="form-label">Título <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="add_titulo" name="titulo" required>
+              </div>
+              <div class="col-12">
+                <label for="add_descripcion" class="form-label">Descripción</label>
+                <textarea class="form-control" id="add_descripcion" name="descripcion" rows="3"></textarea>
+              </div>
+              <div class="col-12">
+                <label for="add_afiche_grafico" class="form-label">URL Afiche Gráfico</label>
+                <input type="text" class="form-control" id="add_afiche_grafico" name="afiche_grafico" placeholder="https://ejemplo.com/imagen.jpg">
+                <small class="text-muted">URL de la imagen del afiche del evento</small>
+              </div>
+              <div class="col-md-6">
+                <label for="add_visibilidad" class="form-label">Visibilidad <span class="text-danger">*</span></label>
+                <select class="form-select" id="add_visibilidad" name="visibilidad" required>
+                  <option value="publico">Público</option>
+                  <option value="privado">Privado</option>
+                  <option value="interno">Interno</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="add_modalidad" class="form-label">Modalidad <span class="text-danger">*</span></label>
+                <select class="form-select" id="add_modalidad" name="modalidad" required>
+                  <option value="presencial">Presencial</option>
+                  <option value="online">Online</option>
+                  <option value="hibrida">Híbrida</option>
+                </select>
+              </div>
+              <div class="col-12">
+                <label for="add_qr_url" class="form-label">Código QR</label>
+                <input type="text" class="form-control" id="add_qr_url" name="qr_url" placeholder="URL del código QR">
+                <small class="text-muted">Dejar vacío o ingresar URL del código QR del evento</small>
+              </div>
+              <div class="col-md-6">
+                <label for="add_duracion" class="form-label">Duración (minutos) <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" id="add_duracion" name="duracion" min="1" required>
+                <small class="text-muted">Ingrese la duración total del evento en minutos</small>
+              </div>
+              <div class="col-md-6">
+                <label for="add_requiere_estacionamiento" class="form-label">Requiere Estacionamiento</label>
+                <select class="form-select" id="add_requiere_estacionamiento" name="requiere_estacionamiento">
+                  <option value="false">No</option>
+                  <option value="true">Sí</option>
+                </select>
+              </div>
+              <div class="col-12" id="add_lugar_container">
+                <label for="add_id_lugar" class="form-label">Lugar <span class="text-danger">*</span></label>
+                <select class="form-select" id="add_id_lugar" name="id_lugar" required>
+                  <option value="">Cargando lugares...</option>
+                </select>
+                <small class="text-muted">Seleccione el lugar donde se realizará el evento</small>
+              </div>
+              <div class="col-12">
+                <label for="add_id_usuarios" class="form-label">Director de Carrera <span class="text-danger">*</span></label>
+                <select class="form-select" id="add_id_usuarios" name="id_usuarios" required>
+                  <option value="">Cargando directores...</option>
+                </select>
+                <small class="text-muted">Seleccione el director de carrera responsable del evento</small>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary" id="addEventoBtn">
+              <i class="ri-save-line me-1"></i> Guardar Evento
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modal para Editar Evento -->
+  <div class="modal fade" id="editEventoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Editar Evento</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="editModalBody">
+          <!-- El contenido se carga dinámicamente -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="saveChangesBtn">Guardar cambios</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de confirmación para eliminar -->
+  <div class="modal fade" id="deleteConfirmModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title text-danger">
+            <i class="ri-error-warning-line me-2"></i>
+            Confirmar Eliminación
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p>¿Está seguro que desea eliminar el evento <strong id="deleteEventoTitulo"></strong>?</p>
+          <div class="alert alert-warning">
+            <i class="ri-alert-line me-2"></i>
+            Esta acción no se puede deshacer.
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+            <i class="ri-delete-bin-line me-1"></i>
+            Eliminar Evento
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script inline -->
+  <script type="module">
+    import Swal from 'https://cdn.jsdelivr.net/npm/sweetalert2@11/+esm'
+    import { ApiService } from '/src/services/api.js'
+
+    // Variables globales
+    let currentEventoId = null
+    let eventoToDelete = null
+    let currentPage = 1
+    const itemsPerPage = 10
+    let filteredRows = []
+    let directoresCarrera = [] // Cache de directores de carrera
+    let lugares = [] // Cache de lugares
+
+    const tableBody = document.getElementById('eventosTableBody')
+    const allRows = tableBody ? [...tableBody.querySelectorAll('tr')] : []
+
+    // Funciones de utilidad para UX
+    const showLoading = (element, text = 'Cargando...') => {
+      element.innerHTML = `
+        <div class="d-flex align-items-center justify-content-center" style="min-height: 200px;">
+          <div class="spinner-border text-primary me-2" role="status">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
+          <span>${text}</span>
+        </div>
+      `
+    }
+
+    const showFieldAlert = (message, fieldId = null) => {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Revisa los campos',
+        text: message,
+        confirmButtonText: 'Entendido'
+      }).then(() => {
+        if (fieldId) {
+          const field = document.getElementById(fieldId)
+          if (field) {
+            field.focus()
+          }
+        }
+      })
+    }
+
+    const showRequestError = (title, message) => {
+      Swal.fire({
+        icon: 'error',
+        title,
+        text: message,
+        confirmButtonText: 'Intentar nuevamente'
+      })
+    }
+
+    // Función para cargar directores de carrera
+    const loadDirectoresCarrera = async () => {
+      if (directoresCarrera.length > 0) {
+        return directoresCarrera // Retornar cache si ya están cargados
+      }
+
+      try {
+        const response = await ApiService.getDirectoresCarrera()
+        directoresCarrera = response || []
+        return directoresCarrera
+      } catch (error) {
+        console.error('Error al cargar directores de carrera:', error)
+        return []
+      }
+    }
+
+    // Función para poblar el select de directores
+    const populateDirectoresSelect = (selectElement, selectedId = null) => {
+      if (!selectElement) return
+
+      // Limpiar opciones existentes
+      selectElement.innerHTML = '<option value="">Seleccione un director...</option>'
+
+      // Agregar opciones de directores
+      directoresCarrera.forEach(director => {
+        const option = document.createElement('option')
+        option.value = director.id_usuarios
+        option.textContent = `${director.nombre} ${director.apellidos}${director.carrera ? ' - ' + director.carrera.descripcion : ''}`
+        
+        if (selectedId && director.id_usuarios === selectedId) {
+          option.selected = true
+        }
+        
+        selectElement.appendChild(option)
+      })
+    }
+
+    // Función para cargar lugares
+    const loadLugares = async () => {
+      if (lugares.length > 0) {
+        return lugares // Retornar cache si ya están cargados
+      }
+
+      try {
+        const response = await ApiService.getLugares()
+        lugares = response.data || []
+        return lugares
+      } catch (error) {
+        console.error('Error al cargar lugares:', error)
+        return []
+      }
+    }
+
+    // Función para poblar el select de lugares
+    const populateLugaresSelect = (selectElement, selectedId = null) => {
+      if (!selectElement) return
+
+      // Limpiar opciones existentes
+      selectElement.innerHTML = '<option value="">Seleccione un lugar...</option>'
+
+      // Agregar opciones de lugares
+      lugares.forEach(lugar => {
+        const option = document.createElement('option')
+        option.value = lugar.id_lugar
+        option.textContent = `${lugar.nombre} - ${lugar.tipo}`
+        
+        if (selectedId && lugar.id_lugar === selectedId) {
+          option.selected = true
+        }
+        
+        selectElement.appendChild(option)
+      })
+    }
+
+    // Función para mostrar/ocultar campo lugar según modalidad
+    const toggleLugarField = (modalidad, containerId, selectId) => {
+      const container = document.getElementById(containerId)
+      const select = document.getElementById(selectId)
+      
+      if (!container || !select) return
+
+      if (modalidad === 'online') {
+        container.style.display = 'none'
+        select.removeAttribute('required')
+        select.value = ''
+      } else {
+        container.style.display = 'block'
+        select.setAttribute('required', 'required')
+      }
+    }
+
+    const toggleFormInputs = (disabled) => {
+      const inputs = document.querySelectorAll('#editEventoModal input, #editEventoModal select, #editEventoModal textarea')
+      inputs.forEach(input => {
+        input.disabled = disabled
+      })
+    }
+
+    const toggleSaveButton = (disabled, text = 'Guardar cambios') => {
+      const saveBtn = document.getElementById('saveChangesBtn')
+      if (saveBtn) {
+        saveBtn.disabled = disabled
+        if (disabled && text === 'Guardando...') {
+          saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Guardando...'
+        } else {
+          saveBtn.innerHTML = text
+        }
+      }
+    }
+
+    // Función para mostrar alerta de éxito
+    const showSuccessAlert = (message, callback) => {
+      const alertHtml = `
+        <div class="modal fade" id="successModal" tabindex="-1">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-body text-center py-4">
+                <i class="ri-checkbox-circle-line text-success" style="font-size: 3rem;"></i>
+                <h5 class="mt-3">${message}</h5>
+              </div>
+              <div class="modal-footer border-0 justify-content-center">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `
+
+      document.body.insertAdjacentHTML('beforeend', alertHtml)
+      const successModal = new bootstrap.Modal(document.getElementById('successModal'))
+
+      document.getElementById('successModal').addEventListener('hidden.bs.modal', () => {
+        document.getElementById('successModal').remove()
+        if (callback) callback()
+      })
+
+      successModal.show()
+    }
+
+    const createFormHTML = () => {
+      return `
+        <form id="editEventoForm">
+          <div class="row g-3">
+            <div class="col-12">
+              <label for="edit_titulo" class="form-label">Título <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="edit_titulo" name="titulo" required>
+            </div>
+            <div class="col-12">
+              <label for="edit_descripcion" class="form-label">Descripción</label>
+              <textarea class="form-control" id="edit_descripcion" name="descripcion" rows="3"></textarea>
+            </div>
+            <div class="col-12">
+              <label for="edit_afiche_grafico" class="form-label">URL Afiche Gráfico</label>
+              <input type="text" class="form-control" id="edit_afiche_grafico" name="afiche_grafico" placeholder="https://ejemplo.com/imagen.jpg">
+              <small class="text-muted">URL de la imagen del afiche del evento</small>
+            </div>
+            <div class="col-md-6">
+              <label for="edit_visibilidad" class="form-label">Visibilidad <span class="text-danger">*</span></label>
+              <select class="form-select" id="edit_visibilidad" name="visibilidad" required>
+                <option value="publico">Público</option>
+                <option value="privado">Privado</option>
+                <option value="interno">Interno</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label for="edit_modalidad" class="form-label">Modalidad <span class="text-danger">*</span></label>
+              <select class="form-select" id="edit_modalidad" name="modalidad" required>
+                <option value="presencial">Presencial</option>
+                <option value="online">Online</option>
+                <option value="hibrida">Híbrida</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label for="edit_qr_url" class="form-label">Código QR</label>
+              <input type="text" class="form-control" id="edit_qr_url" name="qr_url" placeholder="URL del código QR">
+              <small class="text-muted">URL del código QR del evento</small>
+            </div>
+            <div class="col-md-6">
+              <label for="edit_duracion" class="form-label">Duración (minutos) <span class="text-danger">*</span></label>
+              <input type="number" class="form-control" id="edit_duracion" name="duracion" min="1" required>
+              <small class="text-muted">Ingrese la duración total del evento en minutos</small>
+            </div>
+            <div class="col-md-6">
+              <label for="edit_requiere_estacionamiento" class="form-label">Requiere Estacionamiento</label>
+              <select class="form-select" id="edit_requiere_estacionamiento" name="requiere_estacionamiento">
+                <option value="false">No</option>
+                <option value="true">Sí</option>
+              </select>
+            </div>
+            <div class="col-12" id="edit_lugar_container">
+              <label for="edit_id_lugar" class="form-label">Lugar <span class="text-danger">*</span></label>
+              <select class="form-select" id="edit_id_lugar" name="id_lugar" required>
+                <option value="">Seleccione un lugar...</option>
+              </select>
+              <small class="text-muted">Seleccione el lugar donde se realizará el evento</small>
+            </div>
+            <div class="col-12">
+              <label for="edit_id_usuarios" class="form-label">Director de Carrera <span class="text-danger">*</span></label>
+              <select class="form-select" id="edit_id_usuarios" name="id_usuarios" required>
+                <option value="">Seleccione un director...</option>
+              </select>
+              <small class="text-muted">Seleccione el director de carrera responsable del evento</small>
+            </div>
+          </div>
+        </form>
+      `
+    }
+
+    // Función para limpiar el backdrop y resetear modales
+    const cleanupModal = () => {
+      const backdrop = document.querySelector('.modal-backdrop')
+      if (backdrop) {
+        backdrop.remove()
+      }
+      document.body.classList.remove('modal-open')
+      document.body.style.overflow = ''
+      document.body.style.paddingRight = ''
+    }
+
+    // Función de paginación
+    const updatePagination = () => {
+      const totalPages = Math.ceil(filteredRows.length / itemsPerPage)
+      const pagination = document.getElementById('pagination')
+      const paginationInfo = document.getElementById('paginationInfo')
+
+      if (!pagination || !paginationInfo) return
+
+      if (totalPages <= 1) {
+        pagination.innerHTML = ''
+        paginationInfo.textContent = `Mostrando ${filteredRows.length} eventos`
+        return
+      }
+
+      let paginationHTML = ''
+
+      // Botón anterior
+      paginationHTML += `
+        <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+          <a class="page-link" href="#" data-page="${currentPage - 1}">
+            <i class="ri-arrow-left-s-line"></i>
+          </a>
+        </li>
+      `
+
+      // Números de página
+      for (let i = 1; i <= totalPages; i++) {
+        paginationHTML += `
+          <li class="page-item ${currentPage === i ? 'active' : ''}">
+            <a class="page-link" href="#" data-page="${i}">${i}</a>
+          </li>
+        `
+      }
+
+      // Botón siguiente
+      paginationHTML += `
+        <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+          <a class="page-link" href="#" data-page="${currentPage + 1}">
+            <i class="ri-arrow-right-s-line"></i>
+          </a>
+        </li>
+      `
+
+      pagination.innerHTML = paginationHTML
+
+      // Info de paginación
+      const startItem = (currentPage - 1) * itemsPerPage + 1
+      const endItem = Math.min(currentPage * itemsPerPage, filteredRows.length)
+      paginationInfo.textContent = `Mostrando ${startItem}-${endItem} de ${filteredRows.length} eventos`
+    }
+
+    const showPage = (page) => {
+      currentPage = page
+      const startIndex = (page - 1) * itemsPerPage
+      const endIndex = startIndex + itemsPerPage
+
+      // Ocultar todas las filas
+      allRows.forEach(row => row.style.display = 'none')
+
+      // Mostrar filas de la página actual
+      filteredRows.slice(startIndex, endIndex).forEach(row => {
+        row.style.display = ''
+      })
+
+      updatePagination()
+    }
+
+    // Inicializar paginación
+    if (allRows.length > 0) {
+      filteredRows = [...allRows]
+      showPage(1)
+    }
+
+    // Event listeners para paginación
+    document.addEventListener('click', function(e) {
+      if (e.target.closest('.page-link')) {
+        e.preventDefault()
+        const page = parseInt(e.target.closest('.page-link').dataset.page)
+        if (page && page !== currentPage && page >= 1 && page <= Math.ceil(filteredRows.length / itemsPerPage)) {
+          showPage(page)
+        }
+      }
+    })
+
+    // Manejadores de modal
+    const modalCancelButtons = document.querySelectorAll('[data-bs-dismiss="modal"]')
+    modalCancelButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        cleanupModal()
+      })
+    })
+
+    const modals = document.querySelectorAll('.modal')
+    modals.forEach(modal => {
+      modal.addEventListener('hidden.bs.modal', () => {
+        cleanupModal()
+        toggleFormInputs(false)
+        toggleSaveButton(false)
+      })
+    })
+
+    // Lógica para agregar nuevo evento
+    const addEventoForm = document.getElementById('addEventoForm')
+    const addEventoModal = document.getElementById('addEventoModal')
+    
+    // Cargar directores y lugares cuando se abre el modal de agregar
+    if (addEventoModal) {
+      addEventoModal.addEventListener('show.bs.modal', async function() {
+        const selectDirector = document.getElementById('add_id_usuarios')
+        const selectLugar = document.getElementById('add_id_lugar')
+        const modalidadSelect = document.getElementById('add_modalidad')
+        
+        // Cargar directores
+        if (selectDirector) {
+          selectDirector.innerHTML = '<option value="">Cargando directores...</option>'
+          selectDirector.disabled = true
+          
+          await loadDirectoresCarrera()
+          populateDirectoresSelect(selectDirector)
+          selectDirector.disabled = false
+        }
+
+        // Cargar lugares
+        if (selectLugar) {
+          selectLugar.innerHTML = '<option value="">Cargando lugares...</option>'
+          selectLugar.disabled = true
+          
+          await loadLugares()
+          populateLugaresSelect(selectLugar)
+          selectLugar.disabled = false
+        }
+
+        // Configurar visibilidad inicial del campo lugar (presencial por defecto)
+        toggleLugarField('presencial', 'add_lugar_container', 'add_id_lugar')
+
+        // Evento para cambiar visibilidad del campo lugar según modalidad
+        if (modalidadSelect) {
+          modalidadSelect.addEventListener('change', function() {
+            toggleLugarField(this.value, 'add_lugar_container', 'add_id_lugar')
+          })
+        }
+      })
+    }
+    
+    if (addEventoForm) {
+      addEventoForm.addEventListener('submit', async function(e) {
+        e.preventDefault()
+
+        const addBtn = document.getElementById('addEventoBtn')
+        const originalText = addBtn ? addBtn.innerHTML : ''
+
+        const formData = new FormData(this)
+
+        const titulo = (formData.get('titulo') || '').trim()
+        if (!titulo) {
+          showFieldAlert('El título es obligatorio.', 'add_titulo')
+          return
+        }
+
+        const modalidad = formData.get('modalidad')
+        if (!modalidad) {
+          showFieldAlert('Seleccione la modalidad del evento.', 'add_modalidad')
+          return
+        }
+
+        const idUsuariosValue = (formData.get('id_usuarios') || '').trim()
+        if (!idUsuariosValue) {
+          showFieldAlert('Seleccione el director de carrera responsable.', 'add_id_usuarios')
+          return
+        }
+
+        const idLugarValue = (formData.get('id_lugar') || '').trim()
+        if (modalidad !== 'online' && !idLugarValue) {
+          showFieldAlert('Seleccione el lugar para eventos presenciales o híbridos.', 'add_id_lugar')
+          return
+        }
+
+        const duracionValue = (formData.get('duracion') || '').trim()
+        if (!duracionValue) {
+          showFieldAlert('La duración en minutos es obligatoria.', 'add_duracion')
+          return
+        }
+
+        const duracionNumber = parseInt(duracionValue, 10)
+        if (Number.isNaN(duracionNumber) || duracionNumber <= 0) {
+          showFieldAlert('La duración debe ser un número mayor a cero.', 'add_duracion')
+          return
+        }
+
+        if (addBtn) {
+          addBtn.disabled = true
+          addBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando...'
+        }
+
+        const data = {
+          titulo,
+          descripcion: (formData.get('descripcion') || '').trim(),
+          afiche_grafico: (formData.get('afiche_grafico') || '').trim(),
+          visibilidad: formData.get('visibilidad'),
+          modalidad,
+          qr_url: (formData.get('qr_url') || '').trim(),
+          id_usuarios: parseInt(idUsuariosValue, 10),
+          requiere_estacionamiento: formData.get('requiere_estacionamiento') === 'true',
+          duracion: duracionNumber
+        }
+
+        if (modalidad !== 'online' && idLugarValue) {
+          data.id_lugar = parseInt(idLugarValue, 10)
+        }
+
+        const resetAddButton = () => {
+          if (addBtn) {
+            addBtn.disabled = false
+            addBtn.innerHTML = originalText
+          }
+        }
+
+        try {
+          await ApiService.createEvento(data)
+          
+          const modal = bootstrap.Modal.getInstance(document.getElementById('addEventoModal'))
+          modal.hide()
+
+          showSuccessAlert('Evento creado exitosamente', () => {
+            window.location.reload()
+          })
+        } catch (error) {
+          console.error('Error:', error)
+          const apiMessage = error?.response?.data?.message || 'Ocurrió un problema al crear el evento.'
+          showRequestError('No se pudo crear el evento', apiMessage)
+          resetAddButton()
+        }
+      })
+    }
+
+    // Lógica para el modal de edición
+    const editModal = document.getElementById('editEventoModal')
+    const editButtons = document.querySelectorAll('.edit-evento')
+
+    editButtons.forEach(button => {
+      button.addEventListener('click', async function() {
+        currentEventoId = this.getAttribute('data-evento-id')
+
+        const modal = new bootstrap.Modal(editModal)
+        modal.show()
+
+        const modalBody = document.getElementById('editModalBody')
+        showLoading(modalBody, 'Cargando datos del evento...')
+        toggleSaveButton(true, 'Cargando...')
+
+        try {
+          // Cargar directores, lugares y evento en paralelo
+          const [response] = await Promise.all([
+            ApiService.getEvento(currentEventoId),
+            loadDirectoresCarrera(),
+            loadLugares()
+          ])
+          
+          const evento = response.data
+
+          modalBody.innerHTML = createFormHTML()
+
+          document.getElementById('edit_titulo').value = evento.titulo || ''
+          document.getElementById('edit_descripcion').value = evento.descripcion || ''
+          document.getElementById('edit_afiche_grafico').value = evento.afiche_grafico || ''
+          document.getElementById('edit_visibilidad').value = evento.visibilidad || 'publico'
+          document.getElementById('edit_modalidad').value = evento.modalidad || 'presencial'
+          document.getElementById('edit_qr_url').value = evento.qr_url || ''
+          document.getElementById('edit_duracion').value = evento.duracion || ''
+          document.getElementById('edit_requiere_estacionamiento').value = evento.requiere_estacionamiento ? 'true' : 'false'
+
+          // Poblar select de directores con el valor seleccionado
+          const selectDirector = document.getElementById('edit_id_usuarios')
+          populateDirectoresSelect(selectDirector, evento.id_usuarios)
+
+          // Poblar select de lugares con el valor seleccionado
+          const selectLugar = document.getElementById('edit_id_lugar')
+          populateLugaresSelect(selectLugar, evento.id_lugar)
+
+          // Configurar visibilidad del campo lugar según modalidad actual
+          toggleLugarField(evento.modalidad, 'edit_lugar_container', 'edit_id_lugar')
+
+          // Evento para cambiar visibilidad del campo lugar según modalidad
+          const modalidadSelect = document.getElementById('edit_modalidad')
+          if (modalidadSelect) {
+            modalidadSelect.addEventListener('change', function() {
+              toggleLugarField(this.value, 'edit_lugar_container', 'edit_id_lugar')
+            })
+          }
+
+          toggleSaveButton(false)
+        } catch (error) {
+          modalBody.innerHTML = `
+            <div class="alert alert-danger">
+              <i class="ri-error-warning-line me-2"></i>
+              Error al cargar los datos del evento
+            </div>
+          `
+          toggleSaveButton(true)
+        }
+      })
+    })
+
+    // Manejador para guardar cambios
+    document.addEventListener('click', async function(e) {
+      if (e.target && e.target.id === 'saveChangesBtn') {
+        if (!currentEventoId) return
+
+        const tituloValue = document.getElementById('edit_titulo').value
+        const descripcionValue = document.getElementById('edit_descripcion').value || ''
+        const aficheValue = document.getElementById('edit_afiche_grafico').value || ''
+        const visibilidadValue = document.getElementById('edit_visibilidad').value
+        const modalidadValue = document.getElementById('edit_modalidad').value
+        const qrValue = document.getElementById('edit_qr_url').value || ''
+        const idUsuariosValue = document.getElementById('edit_id_usuarios').value
+        const requiereEstacionamientoValue = document.getElementById('edit_requiere_estacionamiento').value === 'true'
+
+        const duracionValue = document.getElementById('edit_duracion').value.trim()
+        if (!duracionValue) {
+          showFieldAlert('La duración en minutos es obligatoria.', 'edit_duracion')
+          return
+        }
+
+        const duracionNumber = parseInt(duracionValue, 10)
+        if (Number.isNaN(duracionNumber) || duracionNumber <= 0) {
+          showFieldAlert('La duración debe ser un número mayor a cero.', 'edit_duracion')
+          return
+        }
+
+        toggleFormInputs(true)
+        toggleSaveButton(true, 'Guardando...')
+
+        const formData = {
+          titulo: tituloValue,
+          descripcion: descripcionValue,
+          afiche_grafico: aficheValue,
+          visibilidad: visibilidadValue,
+          modalidad: modalidadValue,
+          qr_url: qrValue,
+          id_usuarios: parseInt(idUsuariosValue, 10),
+          requiere_estacionamiento: requiereEstacionamientoValue,
+          duracion: duracionNumber
+        }
+
+        // Agregar id_lugar solo si la modalidad no es online
+        const idLugarElement = document.getElementById('edit_id_lugar')
+        if (formData.modalidad !== 'online' && idLugarElement && idLugarElement.value) {
+          formData.id_lugar = parseInt(idLugarElement.value, 10)
+        }
+
+        try {
+          await ApiService.updateEvento(currentEventoId, formData)
+
+          const modal = bootstrap.Modal.getInstance(editModal)
+          modal.hide()
+
+          showSuccessAlert('Evento actualizado exitosamente', () => {
+            window.location.reload()
+          })
+        } catch (error) {
+          console.error('Error:', error)
+          const apiMessage = error?.response?.data?.message || 'Ocurrió un problema al actualizar el evento.'
+          showRequestError('No se pudo actualizar el evento', apiMessage)
+          toggleFormInputs(false)
+          toggleSaveButton(false)
+        }
+      }
+
+      // Manejador para eliminar evento
+      if (e.target.closest('.delete-evento')) {
+        const button = e.target.closest('.delete-evento')
+        eventoToDelete = {
+          id: button.getAttribute('data-evento-id'),
+          titulo: button.getAttribute('data-evento-titulo')
+        }
+
+        document.getElementById('deleteEventoTitulo').textContent = eventoToDelete.titulo
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'))
+        deleteModal.show()
+      }
+
+      // Confirmar eliminación
+      if (e.target && e.target.id === 'confirmDeleteBtn') {
+        if (!eventoToDelete) return
+
+        const originalText = e.target.innerHTML
+        e.target.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Eliminando...'
+        e.target.disabled = true
+
+        try {
+          await ApiService.deleteEvento(eventoToDelete.id)
+
+          const modal = bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal'))
+          modal.hide()
+
+          showSuccessAlert('Evento eliminado exitosamente', () => {
+            window.location.reload()
+          })
+        } catch (error) {
+          console.error('Error:', error)
+          alert('Error al eliminar el evento')
+          e.target.innerHTML = originalText
+          e.target.disabled = false
+        }
+      }
+    })
+
+    // Funcionalidad de búsqueda
+    const searchInput = document.getElementById('searchInput')
+    if (searchInput && allRows.length > 0) {
+      searchInput.addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase()
+
+        filteredRows = allRows.filter(row => {
+          const titulo = row.querySelector('td:first-child')?.textContent.toLowerCase() || ''
+          const descripcion = row.querySelector('td:nth-child(2)')?.textContent.toLowerCase() || ''
+          return titulo.includes(searchTerm) || descripcion.includes(searchTerm)
+        })
+
+        currentPage = 1
+        showPage(1)
+      })
+    }
+
+    // Funcionalidad de ordenamiento
+    const sortButton = document.getElementById('sortButton')
+    if (sortButton && allRows.length > 0) {
+      let isAscending = true
+
+      sortButton.addEventListener('click', function() {
+        filteredRows.sort((a, b) => {
+          const tituloA = a.querySelector('td:first-child .fw-medium')?.textContent.toLowerCase() || ''
+          const tituloB = b.querySelector('td:first-child .fw-medium')?.textContent.toLowerCase() || ''
+
+          return isAscending
+            ? tituloA.localeCompare(tituloB)
+            : tituloB.localeCompare(tituloA)
+        })
+
+        isAscending = !isAscending
+        this.innerHTML = isAscending
+          ? '<i class="ri-sort-asc"></i> Ordenar A-Z'
+          : '<i class="ri-sort-desc"></i> Ordenar Z-A'
+
+        showPage(currentPage)
+      })
+    }
+  </script>
+</AdminLayout>
