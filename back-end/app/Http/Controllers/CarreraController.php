@@ -11,19 +11,25 @@ class CarreraController extends Controller
 
     //Función para listar
     public function index(Request $request)
-{
-    $query = Carrera::with('area');
+    {
+        $query = Carrera::with('area');
 
-    if ($request->has('estado')) {
-        $query->where('estado', $request->estado);
+        if ($request->has('estado')) {
+        $estado = $request->estado;
+        if (is_array($estado)) {
+            $query->whereIn('estado', $estado);
+        } else {
+            $query->where('estado', $estado);
+        }
+        }
+
+
+        if ($request->has('id_area')) {
+            $query->where('id_area', $request->id_area);
+        }
+
+        return response()->json(['data' => $query->get()]);
     }
-
-    if ($request->has('id_area')) {
-        $query->where('id_area', $request->id_area);
-    }
-
-    return response()->json(['data' => $query->get()]);
-}
 
 
 
@@ -42,6 +48,9 @@ class CarreraController extends Controller
             'estado' => 'required|integer|in:0,1',
             'id_area' => 'required|exists:areas,id_area',
         ]);
+
+        Carrera::create($data);
+
     }
 
     //Mostrar

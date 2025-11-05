@@ -22,103 +22,54 @@ const pageScript = `<!-- Add this scripts before body close -->
 <script src="${getAssetPrefix('/assets/vendor/datatables/datatables.init.js')}"></script>
 <script type="module" src="${getAssetPrefix('/assets/js/pages/roles-permissions/groups/table.js')}"></script>
 `
-
-const groups = [
-  {
-    id: 1,
-    title: 'Pages Management',
-    slug: 'pages_management',
-    status: 'Active',
-    added_at: '2024-03-15T10:30:00'
-  },
-  {
-    id: 2,
-    title: 'Posts Management',
-    slug: 'posts_management',
-    status: 'Active',
-    added_at: '2024-03-15T10:30:00'
-  },
-  {
-    id: 3,
-    title: 'Media Library',
-    slug: 'media_library',
-    status: 'Active',
-    added_at: '2024-03-15T10:30:00'
-  },
-  {
-    id: 4,
-    title: 'Categories Management',
-    slug: 'categories_management',
-    status: 'Active',
-    added_at: '2024-03-15T10:30:00'
-  },
-  {
-    id: 5,
-    title: 'SEO Settings',
-    slug: 'seo_settings',
-    status: 'Active',
-    added_at: '2024-03-15T10:30:00'
-  },
-  {
-    id: 6,
-    title: 'URL Redirects',
-    slug: 'url_redirects',
-    status: 'Active',
-    added_at: '2024-03-15T10:30:00'
-  },
-  {
-    id: 7,
-    title: 'Analytics',
-    slug: 'analytics',
-    status: 'Active',
-    added_at: '2024-03-15T10:30:00'
-  },
-  {
-    id: 8,
-    title: 'User Management',
-    slug: 'user_management',
-    status: 'Active',
-    added_at: '2024-03-15T10:30:00'
-  },
-  {
-    id: 9,
-    title: 'Role Management',
-    slug: 'role_management',
-    status: 'Active',
-    added_at: '2024-03-15T10:30:00'
-  },
-  {
-    id: 10,
-    title: 'System Settings',
-    slug: 'system_settings',
-    status: 'Active',
-    added_at: '2024-03-15T10:30:00'
-  },
-  {
-    id: 11,
-    title: 'System Logs',
-    slug: 'system_logs',
-    status: 'Active',
-    added_at: '2024-03-15T10:30:00'
+interface Carrera {
+  id_carrera: number
+  descripcion: string
+  estado: number
+  id_area: number
+  area?: {
+    descripcion: string
   }
-]
+}
 
-// const statusClasses = {
-//   Active: 'success',
-//   Inactive: 'warning',
-//   Trashed: 'danger'
-// }
 
+interface Area {
+  id_area: number;
+  descripcion: string;
+  estado: number;
+}
+
+let areas: Area[] = [];
+
+try {
+  const res = await fetch('http://localhost:3000/api/areas');
+  const json = await res.json();
+  areas = json.data || [];
+} catch (error) {
+  console.error('Error al obtener áreas:', error);
+}
+
+let carreras: Carrera[]=[];
+
+try {
+  const res = await fetch('http://localhost:3000/api/carreras?estado=1');
+  const json = await res.json();
+  carreras = json.data || [];
+} catch (error) {
+  console.error('Error al obtener carreras:', error);
+}
+
+//Page Header
 const pageHeaderProps: PageHeaderProps = {
-  title: 'Groups',
+  title: 'Carreras',
   breadcrumbs: [
     { label: 'Dashboard', href: getPathPrefix('/dashboard'), class: '' },
-    { label: 'Roles & Permissions', href: getPathPrefix('/roles-permissions'), class: '' },
-    { label: 'Groups', class: 'active' }
+    { label: 'Roles y Carreras', href: getPathPrefix('/roles-permissions'), class: '' },
+    { label: 'Carreras', class: 'active' }
   ],
   actions: [
     {
-      label: 'Add Group',
+      label: 'Agregar Carreras',
       href: getPathPrefix('/roles-permissions/groups/add'),
       type: 'link',
       variant: 'btn-primary',
@@ -129,8 +80,8 @@ const pageHeaderProps: PageHeaderProps = {
 ---
 
 <AdminLayout
-  title="Groups"
-  description="Groups Management"
+  title="Carreras Inacap"
+  description="Gestión de Carreras de Inacap"
   currentPath="roles-permissions/groups/list"
   pageScript={pageScript}
   pageCss={pageStyles}
@@ -151,115 +102,59 @@ const pageHeaderProps: PageHeaderProps = {
                   type="text"
                   class="form-control search-input"
                   data-table-filter="search"
-                  placeholder="Search groups..."
+                  placeholder="Buscar carreras..."
                 />
                 <button type="button" class="btn-clear search-clear" style="display: none;">
                   <i class="ri-close-line"></i>
                 </button>
               </div>
               <!--end::Search-->
-              <!--begin::Table toolbar-->
-              <div class="d-flex gap-2 flex-wrap">
-                <!--begin::Filters-->
-                <button
-                  class="btn btn-outline-primary gap-1"
-                  data-bs-toggle="offcanvas"
-                  data-bs-target="#filterDrawer"
-                  data-table-toolbar="filter"
-                >
-                  <i class="ri-filter-2-line"></i> Filters
-                </button>
-                <!--begin::Filter Drawer-->
-                <div
-                  class="offcanvas offcanvas-end filter-drawer datatable-filters"
-                  tabindex="-1"
-                  id="filterDrawer"
-                  aria-labelledby="filterDrawerLabel"
-                  data-table-toolbar="filter"
-                >
-                  <div class="offcanvas-header border-bottom">
-                    <h5 class="offcanvas-title" id="filterDrawerLabel">Filter Options</h5>
-                    <button
-                      type="button"
-                      class="btn-close"
-                      data-bs-dismiss="offcanvas"
-                      aria-label="Close"></button>
-                  </div>
-                  <div class="offcanvas-body p-0">
-                    <div data-table-filter-form="form" class="filter-form h-100 d-flex flex-column">
-                      <div class="filter-form-fields p-4">
-                        <!-- Status -->
-                        <div class="mb-4">
-                          <label class="form-label fw-medium">Status</label>
-                          <div class="form-check mb-2">
-                            <input
-                              class="form-check-input"
-                              type="checkbox"
-                              value="active"
-                              id="active"
-                              name="status"
-                              data-table-filter="status"
-                              data-type="checkbox"
-                              data-label="Status"
-                              data-title="Active"
-                            />
-                            <label class="form-check-label" for="active">
-                              <span class="badge bg-success-subtle text-success">Active</span>
-                            </label>
-                          </div>
-                          <div class="form-check mb-2">
-                            <input
-                              class="form-check-input"
-                              type="checkbox"
-                              value="inactive"
-                              id="inactive"
-                              name="status"
-                              data-table-filter="status"
-                              data-type="checkbox"
-                              data-label="Status"
-                              data-title="Inactive"
-                            />
-                            <label class="form-check-label" for="inactive">
-                              <span class="badge bg-warning-subtle text-warning">Inactive</span>
-                            </label>
-                          </div>
-                          <div class="form-check">
-                            <input
-                              class="form-check-input"
-                              type="checkbox"
-                              value="trashed"
-                              id="trashed"
-                              name="status"
-                              data-table-filter="status"
-                              data-type="checkbox"
-                              data-label="Status"
-                              data-title="Trashed"
-                            />
-                            <label class="form-check-label" for="trashed">
-                              <span class="badge bg-danger-subtle text-danger">Trashed</span>
-                            </label>
-                          </div>
-                        </div>
-                      </div>
+              <!-- Botón para abrir filtros -->
+              <button class="btn btn-outline-primary" data-bs-toggle="offcanvas" data-bs-target="#filterDrawer">
+                <i class="ri-filter-2-line"></i> Filtros
+              </button>
 
-                      <!-- Filter Actions -->
-                      <div class="border-top p-3 mt-auto">
-                        <div class="d-flex gap-2">
-                          <button
-                            type="submit"
-                            class="btn btn-primary flex-grow-1"
-                            data-table-filter-btn="filter">Apply Filters</button
-                          >
-                          <button type="button" class="btn btn-light" data-table-filter-btn="reset"
-                            >Reset</button
-                          >
-                        </div>
+              <!-- Drawer de filtros -->
+              <div class="offcanvas offcanvas-end" tabindex="-1" id="filterDrawer">
+                <div class="offcanvas-header border-bottom">
+                  <h5 class="offcanvas-title">Opciones de Filtro</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+                </div>
+                <div class="offcanvas-body">
+                  <form id="form-filtros" class="d-flex flex-column gap-3">
+                    <!-- Estado -->
+                    <div>
+                      <label class="form-label fw-medium">Estado</label>
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="estado" value="1" id="estado-activo" checked />
+                        <label class="form-check-label" for="estado-activo">Activa</label>
+                      </div>
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="estado" value="0" id="estado-inactivo" />
+                        <label class="form-check-label" for="estado-inactivo">Inactiva</label>
                       </div>
                     </div>
-                  </div>
+
+                    <!-- Área -->
+                    <div>
+                      <label class="form-label fw-medium">Área</label>
+                      <select class="form-select" name="id_area" id="id_area">
+                        <option value="">Todas</option>
+                        <!-- Opciones dinámicas -->
+                        {areas.map(area => (
+                          <option value={area.id_area}>{area.descripcion}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <!-- Acciones -->
+                    <div class="d-flex gap-2 mt-3">
+                      <button type="submit" class="btn btn-primary flex-grow-1">Aplicar filtros</button>
+                      <button type="button" class="btn btn-light" id="reset-filtros">Reiniciar</button>
+                    </div>
+                  </form>
                 </div>
-                <!--end::Filter Drawer-->
-                <!--end::Filters-->
+              </div>
 
                 <!--begin::Bulk Actions-->
                 <div class="bulk-actions-div d-none" data-table-toolbar="bulk_selected">
@@ -287,47 +182,35 @@ const pageHeaderProps: PageHeaderProps = {
               </div>
 
               <div class="table-responsive border-0">
-                <table id="table_groups" class="table align-middle">
+                <table id="table_carreras" class="table align-middle">
                   <thead>
                     <tr>
                       <th class="fs-6">
                         <div class="form-check">
-                          <input
-                            class="form-check-input"
-                            type="checkbox"
-                            data-table-select="select_all"
-                          />
+                          <input class="form-check-input" type="checkbox" data-table-select="select_all" />
                         </div>
                       </th>
-                      <th>GROUP TITLE</th>
-                      <th>SLUG</th>
-                      <th>STATUS</th>
-                      <th>ADDED AT</th>
-                      <th class="text-end pe-3">ACTIONS</th>
+                      <th>CARRERA</th>
+                      <th>ÁREA</th>
+                      <th>ESTADO</th>
+                      <th class="text-end pe-3">ACCIONES</th>
                     </tr>
                   </thead>
                   <tbody>
                     {
-                      groups.map((group) => (
+                      carreras.map((carrera) => (
                         <tr>
                           <td />
                           <td>
-                            <span class="text-primary">{group.title}</span>
+                            <span class="text-primary">{carrera.descripcion}</span>
                           </td>
                           <td>
-                            <span class="text-muted">{group.slug}</span>
+                            <span class="text-muted">{carrera.area?.descripcion ?? '-'}</span>
                           </td>
                           <td>
-                            {group.status == 'Active' ? (
-                              <span class="badge bg-success">{group.status}</span>
-                            ) : group.status == 'Inactive' ? (
-                              <span class="badge bg-warning">{group.status}</span>
-                            ) : (
-                              <span class="badge bg-danger">{group.status}</span>
-                            )}
-                          </td>
-                          <td>
-                            <span class="text-muted">{group.added_at}</span>
+                            <span class="badge ${carrera.estado === 1 ? 'bg-success' : 'bg-warning'}">
+                              ${carrera.estado === 1 ? 'Activa' : 'Inactiva'}
+                            </span>
                           </td>
                           <td class="text-end">
                             <div class="dropdown text-end">
@@ -337,26 +220,24 @@ const pageHeaderProps: PageHeaderProps = {
                                 data-bs-toggle="dropdown"
                                 aria-expanded="false"
                               >
-                                Actions
+                                Acciones
                               </button>
                               <ul class="dropdown-menu">
                                 <li>
                                   <a
                                     class="dropdown-item d-flex align-items-center gap-2"
-                                    href={getPathPrefix('/roles-permissions/groups/edit')}
+                                    href={getPathPrefix(`/roles-permissions/carreras/edit/${carrera.id_carrera}`)}
                                   >
-                                    <i class="ri-pencil-line" /> Edit
+                                    <i class="ri-pencil-line" /> Editar
                                   </a>
                                 </li>
-                                <li>
-                                  <hr class="dropdown-divider" />
-                                </li>
+                                <li><hr class="dropdown-divider" /></li>
                                 <li>
                                   <a
                                     class="dropdown-item d-flex align-items-center gap-2 text-danger delete-button"
                                     href="#"
                                   >
-                                    <i class="ri-delete-bin-line" /> Delete
+                                    <i class="ri-delete-bin-line" /> Eliminar
                                   </a>
                                 </li>
                               </ul>

@@ -109,7 +109,7 @@ const isActiveParent = (path: string) => currentPath.startsWith(path)
           class={`nav-item has-submenu ${isActiveParent('roles-permissions/permissions') ? 'active open' : ''}`}
         >
           <a class="nav-link" href="#">
-            <span>Permissions</span>
+            <span>Areas</span>
             <i class="ri-arrow-right-s-line"></i>
           </a>
           <ul class="submenu">
@@ -117,12 +117,12 @@ const isActiveParent = (path: string) => currentPath.startsWith(path)
               class={`nav-item ${isActive('roles-permissions/permissions/list') ? 'active' : ''}`}
             >
               <a class="nav-link" href={getPathPrefix('/roles-permissions/permissions/list')}>
-                <span>List</span>
+                <span>Lista</span>
               </a>
             </li>
             <li class={`nav-item ${isActive('roles-permissions/permissions/add') ? 'active' : ''}`}>
               <a class="nav-link" href={getPathPrefix('/roles-permissions/permissions/add')}>
-                <span>Add</span>
+                <span>Agregar</span>
               </a>
             </li>
           </ul>
@@ -131,18 +131,18 @@ const isActiveParent = (path: string) => currentPath.startsWith(path)
           class={`nav-item has-submenu ${isActiveParent('roles-permissions/groups') ? 'active open' : ''}`}
         >
           <a class="nav-link" href="#">
-            <span>Groups</span>
+            <span>Carreras</span>
             <i class="ri-arrow-right-s-line"></i>
           </a>
           <ul class="submenu">
             <li class={`nav-item ${isActive('roles-permissions/groups/list') ? 'active' : ''}`}>
               <a class="nav-link" href={getPathPrefix('/roles-permissions/groups/list')}>
-                <span>List</span>
+                <span>Lista</span>
               </a>
             </li>
             <li class={`nav-item ${isActive('roles-permissions/groups/add') ? 'active' : ''}`}>
               <a class="nav-link" href={getPathPrefix('/roles-permissions/groups/add')}>
-                <span>Add</span>
+                <span>Agregar</span>
               </a>
             </li>
           </ul>

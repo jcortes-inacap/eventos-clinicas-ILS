@@ -51,6 +51,7 @@ table.dataTable.table-hover > tbody > tr:hover > *{
 .dataTables_wrapper {
   .table-responsive {
     position: relative;
+    overflow: visible !important;
   }
 
   &.processing {

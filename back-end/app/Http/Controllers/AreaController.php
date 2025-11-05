@@ -121,5 +121,4 @@ class AreaController extends Controller
 
         return response()->json(['mensaje' => $mensaje]);
     }
-
 }
