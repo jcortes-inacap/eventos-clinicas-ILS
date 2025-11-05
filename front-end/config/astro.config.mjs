@@ -5,6 +5,7 @@ Note this config is used in build time only. For development server src/tools/de
 import { defineConfig } from 'astro/config'
 import path from 'path'
 
+
 // Custom Vite plugin to watch for asset changes and trigger HMR
 const assetHmrPlugin = () => {
   return {
@@ -37,6 +38,7 @@ const assetHmrPlugin = () => {
 
 // https://astro.build/config
 export default defineConfig({
+  output: 'server',
   devToolbar: { enabled: false }, // Disable the dev toolbar
   build: {
     // Example: Generate `page.html` instead of `page/index.html` during build.

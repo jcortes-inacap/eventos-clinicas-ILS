@@ -85,156 +85,46 @@ const pageHeaderProps: PageHeaderProps = {
                   type="text"
                   class="form-control search-input"
                   data-table-filter="search"
-                  placeholder="Search permissions..."
+                  placeholder="Buscar áreas..."
                 />
                 <button type="button" class="btn-clear search-clear" style="display: none;">
                   <i class="ri-close-line"></i>
                 </button>
               </div>
               <!--end::Search-->
-              <!--begin::Table toolbar-->
-              <div class="d-flex gap-2 flex-wrap">
-                <!--begin::Filters-->
-                <button
-                  class="btn btn-outline-primary gap-1"
-                  data-bs-toggle="offcanvas"
-                  data-bs-target="#filterDrawer"
-                  data-table-toolbar="filter"
-                >
-                  <i class="ri-filter-2-line"></i> Filters
-                </button>
-                <!--begin::Filter Drawer-->
-                <div
-                  class="offcanvas offcanvas-end filter-drawer datatable-filters"
-                  tabindex="-1"
-                  id="filterDrawer"
-                  aria-labelledby="filterDrawerLabel"
-                  data-table-toolbar="filter"
-                >
-                  <div class="offcanvas-header border-bottom">
-                    <h5 class="offcanvas-title" id="filterDrawerLabel">Filter Options</h5>
-                    <button
-                      type="button"
-                      class="btn-close"
-                      data-bs-dismiss="offcanvas"
-                      aria-label="Close"></button>
-                  </div>
-                  <div class="offcanvas-body p-0">
-                    <div data-table-filter-form="form" class="filter-form h-100 d-flex flex-column">
-                      <div class="filter-form-fields p-4">
-                        <!-- Status -->
-                        <div class="mb-4">
-                          <label class="form-label fw-medium">Status</label>
-                          <div class="form-check mb-2">
-                            <input
-                              class="form-check-input"
-                              type="checkbox"
-                              value="active"
-                              id="active"
-                              name="status"
-                              data-table-filter="status"
-                              data-type="checkbox"
-                              data-label="Status"
-                              data-title="Active"
-                            />
-                            <label class="form-check-label" for="active">
-                              <span class="badge bg-success-subtle text-success">Active</span>
-                            </label>
-                          </div>
-                          <div class="form-check mb-2">
-                            <input
-                              class="form-check-input"
-                              type="checkbox"
-                              value="inactive"
-                              id="inactive"
-                              name="status"
-                              data-table-filter="status"
-                              data-type="checkbox"
-                              data-label="Status"
-                              data-title="Inactive"
-                            />
-                            <label class="form-check-label" for="inactive">
-                              <span class="badge bg-warning-subtle text-warning">Inactive</span>
-                            </label>
-                          </div>
-                          <div class="form-check">
-                            <input
-                              class="form-check-input"
-                              type="checkbox"
-                              value="trashed"
-                              id="trashed"
-                              name="status"
-                              data-table-filter="status"
-                              data-type="checkbox"
-                              data-label="Status"
-                              data-title="Trashed"
-                            />
-                            <label class="form-check-label" for="trashed">
-                              <span class="badge bg-danger-subtle text-danger">Trashed</span>
-                            </label>
-                          </div>
-                        </div>
+              <!-- Botón para abrir filtros -->
+              <button class="btn btn-outline-primary" data-bs-toggle="offcanvas" data-bs-target="#filterDrawer">
+                <i class="ri-filter-2-line"></i> Filtros
+              </button>
 
-                        <!-- Module -->
-                        <div class="mb-4">
-                          <label class="form-label fw-medium">Module</label>
-                          <select
-                            class="form-select"
-                            id="module"
-                            name="module"
-                            data-table-filter="module"
-                          >
-                            <option value="">All Modules</option>
-                            <option value="CMS">CMS</option>
-                            <option value="SEO">SEO</option>
-                            <option value="System">System</option>
-                          </select>
-                        </div>
-
-                        <!-- Group -->
-                        <div class="mb-4">
-                          <label class="form-label fw-medium">Permission Group</label>
-                          <select
-                            class="form-select"
-                            id="group"
-                            name="group"
-                            data-table-filter="group"
-                          >
-                            <option value="">All Groups</option>
-                            <option value="Pages Management">Pages Management</option>
-                            <option value="Posts Management">Posts Management</option>
-                            <option value="Media Library">Media Library</option>
-                            <option value="Categories Management">Categories Management</option>
-                            <option value="SEO Settings">SEO Settings</option>
-                            <option value="URL Redirects">URL Redirects</option>
-                            <option value="Analytics">Analytics</option>
-                            <option value="User Management">User Management</option>
-                            <option value="Role Management">Role Management</option>
-                            <option value="System Settings">System Settings</option>
-                            <option value="System Logs">System Logs</option>
-                          </select>
-                        </div>
+              <!-- Drawer de filtros -->
+              <div class="offcanvas offcanvas-end" tabindex="-1" id="filterDrawer">
+                <div class="offcanvas-header border-bottom">
+                  <h5 class="offcanvas-title">Opciones de Filtro</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+                </div>
+                <div class="offcanvas-body">
+                  <form id="form-filtros" class="d-flex flex-column gap-3">
+                    <!-- Estado -->
+                    <div>
+                      <label class="form-label fw-medium">Estado</label>
+                      <div class="form-check">
+                        <input class="form-check-input" type="radio" name="estado" id="estado-activo" value="1" checked />
+                        <label class="form-check-label" for="estado-activo">Activa</label>
                       </div>
-
-                      <!-- Filter Actions -->
-                      <div class="border-top p-3 mt-auto">
-                        <div class="d-flex gap-2">
-                          <button
-                            type="submit"
-                            class="btn btn-primary flex-grow-1"
-                            data-table-filter-btn="filter">Apply Filters</button
-                          >
-                          <button type="button" class="btn btn-light" data-table-filter-btn="reset"
-                            >Reset</button
-                          >
-                        </div>
+                      <div class="form-check">
+                        <input class="form-check-input" type="radio" name="estado" id="estado-inactivo" value="0" />
+                        <label class="form-check-label" for="estado-inactivo">Inactiva</label>
                       </div>
                     </div>
-                  </div>
+                    <!-- Acciones -->
+                    <div class="d-flex gap-2 mt-3">
+                      <button type="submit" class="btn btn-primary flex-grow-1">Aplicar filtros</button>
+                      <button type="button" class="btn btn-light" id="reset-filtros">Reset</button>
+                    </div>
+                  </form>
                 </div>
-                <!--end::Filter Drawer-->
-                <!--end::Filters-->
-
+              </div>
                 <!--begin::Bulk Actions-->
                 <div class="bulk-actions-div d-none" data-table-toolbar="bulk_selected">
                   <span class="selected-count me-2"
@@ -272,7 +162,7 @@ const pageHeaderProps: PageHeaderProps = {
                       </th>
                       <th>DESCRIPCIÓN</th>
                       <th>ESTADO</th>
-                      <th class="text-end pe-3">ACTIONS</th>
+                      <th class="text-end pe-3">Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -300,12 +190,9 @@ const pageHeaderProps: PageHeaderProps = {
                               </button>
                               <ul class="dropdown-menu">
                                 <li>
-                                  <a
-                                    href={`/roles-permissions/permissions/edit?id=${area.id_area}`}
-                                    class="dropdown-item text-primary"
-                                  >
-                                    Editar
-                                  </a>
+                                  <a href={`/roles-permissions/permissions/edit?id=${area.id_area}`} class="dropdown-item text-primary">
+                                  Editar
+                                </a>
                                 </li>
                                 <li><hr class="dropdown-divider" /></li>
                                 {area.estado === 1 ? (
@@ -364,4 +251,47 @@ const pageHeaderProps: PageHeaderProps = {
   </div>
 
   <ConfirmationModal />
+
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const tabla = document.getElementById('tabla-areas') as HTMLElement
+
+    const cargarAreas = async (params = '') => {
+      const res = await fetch(`http://localhost:3000/api/areas?${params}`)
+      const json = await res.json()
+      const areas = json.data
+
+      tabla.innerHTML = areas.map((area: any) => `
+        <tr>
+          <td>${area.id_area}</td>
+          <td>${area.descripcion}</td>
+          <td>${area.estado === 1 ? 'Activa' : 'Inactiva'}</td>
+        </tr>
+      `).join('')
+    }
+
+    // Carga inicial con estado=1
+    await cargarAreas('estado=1')
+
+    // Filtro dinámico
+    const form = document.getElementById('form-filtros') as HTMLFormElement
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      const formData = new FormData(form)
+      const params = new URLSearchParams()
+      formData.forEach((value, key) => {
+        if (typeof value === 'string' && value.trim() !== '') {
+          params.append(key, value)
+        }
+      })
+      await cargarAreas(params.toString())
+    })
+
+    // Reset de filtros
+    document.getElementById('reset-filtros')?.addEventListener('click', async () => {
+      form.reset()
+      await cargarAreas('estado=1')
+    })
+  })
+</script>
 </AdminLayout>

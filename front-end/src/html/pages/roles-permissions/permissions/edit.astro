@@ -12,18 +12,22 @@ interface Area {
 
 const url = new URL(Astro.request.url)
 const id = url.searchParams.get('id')
-
 let area: Area | null = null
 
 if (id) {
   try {
     const response = await fetch(`http://localhost:3000/api/areas/${id}`)
-    if (!response.ok) throw new Error(`Error ${response.status}`)
-    area = await response.json()
+    const json = await response.json()
+    if (json && typeof json === 'object' && 'id_area' in json) {
+      area = json
+    } else {
+      throw new Error('Estructura inesperada del JSON')
+    }
   } catch (error) {
-    console.error('Error al obtener el área:', error)
+    console.error('Error en fetch:', error)
   }
 }
+
 const pageHeaderProps: PageHeaderProps = {
   title: 'Editar Área',
   breadcrumbs: [
@@ -48,7 +52,9 @@ const pageHeaderProps: PageHeaderProps = {
   <PageHeader {...pageHeaderProps} />
 
   {area ? (
-    <form method="POST" action={`http://localhost:3000/api/areas/${id}?_method=PUT`}>
+    <form id="form-edicion">
+      <input type="hidden" name="id_area" value={area.id_area} />
+
       <div class="row">
         <div class="col-md-8 mb-3">
           <div class="card">
@@ -92,4 +98,37 @@ const pageHeaderProps: PageHeaderProps = {
   ) : (
     <div class="alert alert-danger">No se pudo cargar el área</div>
   )}
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('form-edicion') as HTMLFormElement
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      const formData = new FormData(form)
+      const data: Record<string, string> = {}
+      formData.forEach((value, key) => {
+        data[key] = typeof value === 'string' ? value : ''
+      })
+      const id = data.id_area
+
+      const res = await fetch(`http://localhost:3000/api/areas/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          descripcion: data.descripcion,
+          estado: parseInt(data.estado)
+        })
+      })
+
+      if (res.ok) {
+        window.location.href = '/roles-permissions/permissions/list'
+      } else {
+        alert('Error al actualizar el área')
+      }
+    })
+  })
+  </script>
 </AdminLayout>
