@@ -58,23 +58,35 @@ class AreaController extends Controller
 
 
     //Editar
-    public function edit(Area $area)
+    public function edit(Request $request)
     {
+        $id = $request->query('id');
+
+        if (!$id) {
+            return response()->json(['error' => 'ID no proporcionado'], 400);
+        }
+
+        $area = Area::find($id);
+
+        if (!$area) {
+            return response()->json(['error' => 'Área no encontrada'], 404);
+        }
+
         return response()->json(['area' => $area]);
     }
 
     //Actualizar
-    public function update(Request $request, Area $area)
+    public function update(Request $request, $id)
     {
-        $request->validate([
-            'descripcion' => 'required|string|max:255',
-            'estado' => 'required|in:0,1'
+        $data = $request->validate([
+            'descripcion' => 'required|string|max:150',
+            'estado' => 'required|integer|in:0,1'
         ]);
 
-        $area->update($request->only(['descripcion', 'estado']));
+        $area = Area::findOrFail($id);
+        $area->update($data);
 
-        return redirect('/roles-permissions/permissions/list')
-            ->with('success', 'Área actualizada correctamente');
+        return response()->json(['message' => 'Área actualizada']);
     }
 
 
