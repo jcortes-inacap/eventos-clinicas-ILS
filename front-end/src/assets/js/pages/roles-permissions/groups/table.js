@@ -67,7 +67,7 @@ var GroupsDatatable = (function () {
               `
                   <div class="dropdown text-end">
                       <button class="btn btn-light btn-active-light-primary dropdown-toggle shadow-none action-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                          Actions
+                          Accciones
                       </button>
                       <ul class="dropdown-menu">
                         <li><a class="dropdown-item d-flex align-items-center gap-2" href="` +

@@ -26,81 +26,24 @@ var PermissionsDatatable = (function () {
           className: 'select-checkbox',
           render: function (data) {
             return `<div class="form-check">
-                            <input class="form-check-input bulk-select" type="checkbox" value="${data}">
+                            <input
+                            class="form-check-input bulk-select m-0"
+                            type="checkbox"
+                            value={area.id_area}
+                            data-row-id={area.id_area}
+                          />
                         </div>`
           }
         },
         {
           targets: 1,
-          render: function (data) {
-            return `<span class="text-primary">${data}</span>`
-          }
         },
         {
           targets: 2,
-          render: function (data) {
-            return `<span>${data}</span>`
-          }
         },
         {
           targets: 3,
-          render: function (data) {
-            const moduleClasses = {
-              CMS: 'info',
-              SEO: 'primary',
-              System: 'secondary'
-            }
-            return `<span class="badge bg-${moduleClasses[data]}">${data}</span>`
-          }
-        },
-        {
-          targets: 4,
-          render: function (data) {
-            return `<span class="badge bg-light text-dark">${data}</span>`
-          }
-        },
-        {
-          targets: 5,
-          render: function (data) {
-            const statusClasses = {
-              Active: 'success',
-              Inactive: 'warning',
-              Trashed: 'danger'
-            }
-            return `<span class="badge bg-${statusClasses[data]}">${data}</span>`
-          }
-        },
-        {
-          targets: 6,
-          searchable: false,
-          render: function (data) {
-            const date = new Date(data)
-            return `<span class="text-muted">${date.toLocaleDateString()} ${date.toLocaleTimeString()}</span>`
-          }
-        },
-        {
-          targets: -1,
-          data: null,
-          orderable: false,
-          searchable: false,
-          className: 'text-end',
-          render: function () {
-            return (
-              `<div class="dropdown text-end">
-                <button class="btn btn-light btn-active-light-primary dropdown-toggle shadow-none action-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    Actions
-                </button>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item d-flex align-items-center gap-2" href="` +
-              getPathPrefix('/roles-permissions/permissions/edit') +
-              `"><i class="ri-pencil-line"></i> Edit</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item d-flex align-items-center gap-2 text-danger delete-button" href="#"><i class="ri-delete-bin-line"></i> Delete</a></li>
-                </ul>
-            </div>`
-            )
-          }
-        }
+          },
       ]
     })
 

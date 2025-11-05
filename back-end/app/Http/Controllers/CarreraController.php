@@ -22,7 +22,7 @@ class CarreraController extends Controller
         $query->where('id_area', $request->id_area);
     }
 
-    return response()->json($query->paginate(10));
+    return response()->json(['data' => $query->get()]);
 }
 
 

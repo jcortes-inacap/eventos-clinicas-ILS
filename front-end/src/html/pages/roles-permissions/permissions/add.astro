@@ -146,130 +146,33 @@ const pageScript = `
 ---
 
 <AdminLayout
-  title="Add Permission"
-  description="Create New Permission"
+  title="Agregar Area"
+  description="Crear nuevas áreas de estudio"
   currentPath="roles-permissions/permissions/add"
   pageScript={pageScript}
 >
   <PageHeader {...pageHeaderProps} />
 
-  <form id="permissionForm" novalidate>
-    <div class="row">
-      <div class="col-md-8 mb-3">
-        <div class="card">
-          <div class="card-body">
-            <!-- Permission Title -->
-            <div class="row mb-3">
-              <div class="col-12">
-                <div class="form-group">
-                  <label for="permissionTitle" class="form-label"
-                    >Permission Title <span class="text-danger">*</span></label
-                  >
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="permissionTitle"
-                    name="permissionTitle"
-                    placeholder="Enter permission title"
-                  />
-                  <div class="form-text">Example: manage_users, view_dashboard, etc.</div>
-                </div>
-              </div>
-            </div>
-            <!-- Display Name -->
-            <div class="row mb-3">
-              <div class="col-12">
-                <div class="form-group">
-                  <label for="displayName" class="form-label"
-                    >Display Name <span class="text-danger">*</span></label
-                  >
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="displayName"
-                    name="displayName"
-                    placeholder="Enter display name"
-                  />
-                  <div class="form-text">Human-readable name for the permission</div>
-                </div>
-              </div>
-            </div>
-            <!-- Module -->
-            <div class="row mb-3">
-              <div class="col-12">
-                <div class="form-group">
-                  <label for="module" class="form-label"
-                    >Module <span class="text-danger">*</span></label
-                  >
-                  <select class="form-select" id="module" name="module" required>
-                    <option value="">Select Module</option>
-                    <option value="CMS">CMS</option>
-                    <option value="SEO">SEO</option>
-                    <option value="System">System</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-            <!-- Permission Group -->
-            <div class="row mb-3">
-              <div class="col-12">
-                <div class="form-group">
-                  <label for="group" class="form-label"
-                    >Permission Group <span class="text-danger">*</span></label
-                  >
-                  <select class="form-select" id="group" name="group" required>
-                    <option value="">Select Group</option>
-                    <option value="Pages Management">Pages Management</option>
-                    <option value="Posts Management">Posts Management</option>
-                    <option value="Media Library">Media Library</option>
-                    <option value="Categories Management">Categories Management</option>
-                    <option value="SEO Settings">SEO Settings</option>
-                    <option value="URL Redirects">URL Redirects</option>
-                    <option value="Analytics">Analytics</option>
-                    <option value="User Management">User Management</option>
-                    <option value="Role Management">Role Management</option>
-                    <option value="System Settings">System Settings</option>
-                    <option value="System Logs">System Logs</option>
-                  </select>
-                  <div class="form-text">
-                    Group helps in organizing permissions by their purpose
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4 mb-3">
-        <div class="card">
-          <div class="card-body">
-            <!-- Status -->
-            <div class="row mb-3">
-              <div class="col-12">
-                <div class="form-group">
-                  <label for="status" class="form-label"
-                    >Status <span class="text-danger">*</span></label
-                  >
-                  <select class="form-select" id="status" name="status" required>
-                    <option value="Active" selected>Active</option>
-                    <option value="Inactive">Inactive</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="card-footer">
-            <!-- Form Actions -->
-            <div class="d-flex flex-column flex-lg-row justify-content-end gap-2">
-              <a
-                href={getPathPrefix('/roles-permissions/permissions/list')}
-                class="btn btn-outline-secondary">Cancel</a
-              >
-              <button type="submit" class="btn btn-primary">Create Permission</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </form>
+<form method="POST" action="http://localhost:3000/api/areas">
+  <div class="mb-3">
+    <label for="descripcion" class="form-label">Área de estudio</label>
+    <input
+      type="text"
+      class="form-control"
+      id="descripcion"
+      name="descripcion"
+      required
+    />
+  </div>
+
+  <div class="mb-3">
+    <label for="estado" class="form-label">Estado</label>
+    <select class="form-select" id="estado" name="estado" required>
+      <option value="1" selected>Activa</option>
+      <option value="0">Inactiva</option>
+    </select>
+  </div>
+
+  <button type="submit" class="btn btn-primary">Crear Área</button>
+</form>
 </AdminLayout>

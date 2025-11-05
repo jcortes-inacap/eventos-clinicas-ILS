@@ -21,7 +21,7 @@ class AreaController extends Controller
         $query->where('descripcion', 'like', '%' . $request->descripcion . '%');
     }
 
-    return response()->json($query->paginate(10));
+    return response()->json(['data' => $query->get()]);
 }
 
 
@@ -45,10 +45,17 @@ class AreaController extends Controller
     }
 
     //Mostrar
-    public function show(Area $area)
+    public function show($id)
     {
+        $area = Area::find($id);
+
+        if (!$area) {
+            return response()->json(['error' => 'Área no encontrada'], 404);
+        }
+
         return response()->json($area);
     }
+
 
     //Editar
     public function edit(Area $area)
@@ -59,14 +66,18 @@ class AreaController extends Controller
     //Actualizar
     public function update(Request $request, Area $area)
     {
-        $data = $request->validate([
-            'descripcion' => 'required|string|max:150',
-            'estado' => 'required|integer|in:0,1'
+        $request->validate([
+            'descripcion' => 'required|string|max:255',
+            'estado' => 'required|in:0,1'
         ]);
 
-        $area->update($data);
-        return response()->json($area);
+        $area->update($request->only(['descripcion', 'estado']));
+
+        return redirect('/roles-permissions/permissions/list')
+            ->with('success', 'Área actualizada correctamente');
     }
+
+
 
     //Eliminar
     public function destroy(Area $area)
@@ -83,4 +94,20 @@ class AreaController extends Controller
         $area->save();
         return response()->json(['mensaje' => 'Área desactivada']);
     }
+
+    public function toggleEstado(Area $area)
+    {
+        if ($area->estado === 1) {
+            $area->estado = 0;
+            $mensaje = 'Área desactivada';
+        } else {
+            $area->estado = 1;
+            $mensaje = 'Área activada';
+        }
+
+        $area->save();
+
+        return response()->json(['mensaje' => $mensaje]);
+    }
+
 }

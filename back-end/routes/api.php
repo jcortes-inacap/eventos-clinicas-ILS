@@ -67,5 +67,9 @@ Route::prefix('catalogos')->group(function() {
     // TODO agregar más catálogos si es necesario, por ejemplo docentes, asistentes, etc...
 });
 
+
+
+///Rutas de Cargos y Carreras
 Route::apiResource('areas', AreaController::class);
 Route::apiResource('carreras', CarreraController::class);
+Route::post('/areas/{area}/toggle', [AreaController::class, 'toggleEstado']);
