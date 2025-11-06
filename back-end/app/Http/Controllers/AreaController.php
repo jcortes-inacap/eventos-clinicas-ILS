@@ -34,15 +34,23 @@ class AreaController extends Controller
 
     //Store
     public function store(Request $request)
-    {
-        $data = $request->validate([
-            'descripcion' => 'required|string|max:150',
-            'estado' => 'required|integer|in:0,1'
-        ]);
+        {
+            $data = $request->json()->all(); // ← esto lee el JSON correctamente
 
-        $area = Area::create($data);
-        return response()->json($area, 201);
-    }
+            $area = new Area();
+            $area->descripcion = $data['descripcion'] ?? '';
+            $area->estado = $data['estado'] ?? 0;
+            $area->save();
+
+            return response()->json([
+                'id_area' => $area->id_area,
+                'estado' => $area->estado
+            ]);
+        }
+
+
+
+
 
     //Mostrar
     public function show($id)

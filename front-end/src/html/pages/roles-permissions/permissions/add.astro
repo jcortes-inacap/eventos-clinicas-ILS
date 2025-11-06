@@ -8,13 +8,13 @@ const pageHeaderProps: PageHeaderProps = {
   title: 'Add Permission',
   breadcrumbs: [
     { label: 'Dashboard', href: getPathPrefix('/dashboard') },
-    { label: 'Roles & Permissions', href: getPathPrefix('/roles-permissions') },
-    { label: 'Permissions', href: getPathPrefix('/roles-permissions/permissions/list') },
-    { label: 'Add Permission', class: 'active' }
+    { label: 'Roles y Carreras', href: getPathPrefix('/roles-permissions') },
+    { label: 'Areas', href: getPathPrefix('/roles-permissions/permissions/list') },
+    { label: 'Agregar Carrera', class: 'active' }
   ],
   actions: [
     {
-      label: 'Back',
+      label: 'Volver',
       href: getPathPrefix('/roles-permissions/permissions/list'),
       type: 'link',
       variant: 'btn-outline-primary',
@@ -149,30 +149,43 @@ const pageScript = `
   title="Agregar Area"
   description="Crear nuevas áreas de estudio"
   currentPath="roles-permissions/permissions/add"
-  pageScript={pageScript}
 >
   <PageHeader {...pageHeaderProps} />
 
-<form method="POST" action="http://localhost:3000/api/areas">
   <div class="mb-3">
     <label for="descripcion" class="form-label">Área de estudio</label>
-    <input
-      type="text"
-      class="form-control"
-      id="descripcion"
-      name="descripcion"
-      required
-    />
+    <input type="text" class="form-control" id="descripcion" required />
   </div>
 
   <div class="mb-3">
     <label for="estado" class="form-label">Estado</label>
-    <select class="form-select" id="estado" name="estado" required>
+    <select class="form-select" id="estado" required>
       <option value="1" selected>Activa</option>
       <option value="0">Inactiva</option>
     </select>
   </div>
 
-  <button type="submit" class="btn btn-primary">Crear Área</button>
-</form>
+  <button
+    class="btn btn-primary"
+    onclick={`const descripcion = document.getElementById('descripcion').value.trim();
+              const estado = document.getElementById('estado').value;
+              if (!descripcion) { alert('La descripción es obligatoria'); return false; }
+              fetch('http://localhost:3000/api/areas', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify({ descripcion, estado })
+              })
+              .then(res => res.json())
+              .then(data => {
+                alert('Área creada correctamente: ID = ' + data.id_area);
+                location.href = '/roles-permissions/permissions/list';
+              })
+              .catch(err => {
+                console.error(err);
+                alert('Error al crear el área');
+              });
+              return false;`}
+  >
+    Crear Área
+  </button>
 </AdminLayout>
