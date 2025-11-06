@@ -88,14 +88,12 @@ const pageHeaderProps: PageHeaderProps = {
 >
   <PageHeader {...pageHeaderProps} />
 
-  <!-- Permissions Table -->
   <div class="row">
     <div class="col-12">
       <div class="card">
         <div class="card-body">
           <div class="astero-table">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
-              <!--begin::Search-->
               <div class="search-wrapper">
                 <i class="ri-search-line search-icon"></i>
                 <input
@@ -108,13 +106,11 @@ const pageHeaderProps: PageHeaderProps = {
                   <i class="ri-close-line"></i>
                 </button>
               </div>
-              <!--end::Search-->
-              <!-- Botón para abrir filtros -->
+
               <button class="btn btn-outline-primary" data-bs-toggle="offcanvas" data-bs-target="#filterDrawer">
                 <i class="ri-filter-2-line"></i> Filtros
               </button>
 
-              <!-- Drawer de filtros -->
               <div class="offcanvas offcanvas-end" tabindex="-1" id="filterDrawer">
                 <div class="offcanvas-header border-bottom">
                   <h5 class="offcanvas-title">Opciones de Filtro</h5>
@@ -122,7 +118,6 @@ const pageHeaderProps: PageHeaderProps = {
                 </div>
                 <div class="offcanvas-body">
                   <form id="form-filtros" class="d-flex flex-column gap-3">
-                    <!-- Estado -->
                     <div>
                       <label class="form-label fw-medium">Estado</label>
                       <div class="form-check">
@@ -134,7 +129,6 @@ const pageHeaderProps: PageHeaderProps = {
                         <label class="form-check-label" for="estado-inactivo">Inactiva</label>
                       </div>
                     </div>
-                    <!-- Acciones -->
                     <div class="d-flex gap-2 mt-3">
                       <button type="submit" class="btn btn-primary flex-grow-1">Aplicar filtros</button>
                       <button type="button" class="btn btn-light" id="reset-filtros">Reiniciar</button>
@@ -142,30 +136,26 @@ const pageHeaderProps: PageHeaderProps = {
                   </form>
                 </div>
               </div>
-                <!--begin::Bulk Actions-->
-                <div class="bulk-actions-div d-none" data-table-toolbar="bulk_selected">
-                  <span class="selected-count me-2"
-                    ><span data-table-select="selected_count"></span> items selected</span
-                  >
-                  <button
-                    class="btn btn-light-danger shadow-none align-items-center gap-2 bulk-delete"
-                    data-table-select="delete_selected"
-                  >
-                    Delete Selected
-                  </button>
-                </div>
-                <!--end::Bulk Actions-->
+
+              <div class="bulk-actions-div d-none" data-table-toolbar="bulk_selected">
+                <span class="selected-count me-2">
+                  <span data-table-select="selected_count"></span> items selected
+                </span>
+                <button
+                  class="btn btn-light-danger shadow-none align-items-center gap-2 bulk-delete"
+                  data-table-select="delete_selected"
+                >
+                  Delete Selected
+                </button>
               </div>
-              <!--end::Table toolbar-->
             </div>
+
             <div class="table-container">
-              <div
-                class="d-none flex-column flex-lg-row justify-content-start filter-datas mb-3"
-                data-filters
-              >
+              <div class="d-none flex-column flex-lg-row justify-content-start filter-datas mb-3" data-filters>
                 <strong class="fs-6 me-2 text-primary">Filters : </strong>
                 <div class="d-flex flex-row flex-wrap align-items-center" data-filters-data></div>
               </div>
+
               <div class="table-responsive border-0">
                 <table id="table_permissions" class="table align-middle">
                   <thead>
@@ -208,49 +198,31 @@ const pageHeaderProps: PageHeaderProps = {
                               <ul class="dropdown-menu">
                                 <li>
                                   <a href={`/roles-permissions/permissions/edit?id=${area.id_area}`} class="dropdown-item text-primary">
-                                  Editar
-                                </a>
+                                    Editar
+                                  </a>
                                 </li>
                                 <li><hr class="dropdown-divider" /></li>
-                                {area.estado === 1 ? (
-                                  <li>
-                                    <a
-                                      class="dropdown-item text-danger"
-                                      href="#"
-                                      onclick={`if (confirm('¿Estás seguro de que deseas desactivar esta área?')) {
-                                        fetch('http://localhost:3000/api/areas/${area.id_area}/toggle', {
-                                          method: 'POST'
-                                        })
-                                        .then(res => res.json())
-                                        .then(data => {
-                                          alert(data.mensaje);
-                                          location.reload();
-                                        });
-                                      } return false;`}
-                                    >
-                                      Desactivar
-                                    </a>
-                                  </li>
-                                ) : (
-                                  <li>
-                                    <a
-                                      class="dropdown-item text-success"
-                                      href="#"
-                                      onclick={`if (confirm('¿Estás seguro de que deseas activar esta área?')) {
-                                        fetch('http://localhost:3000/api/areas/${area.id_area}/toggle', {
-                                          method: 'POST'
-                                        })
-                                        .then(res => res.json())
-                                        .then(data => {
-                                          alert(data.mensaje);
-                                          location.reload();
-                                        });
-                                      } return false;`}
-                                    >
-                                      Activar
-                                    </a>
-                                  </li>
-                                )}
+                                <li>
+                                  <a
+                                    class={`dropdown-item ${area.estado === 1 ? 'text-danger' : 'text-success'}`}
+                                    href="#"
+                                    onclick={`if (confirm('¿Estás seguro de que deseas ${area.estado === 1 ? 'desactivar' : 'activar'} esta área?')) {
+                                      fetch('http://localhost:3000/api/areas/${area.id_area}/toggle', {
+                                        method: 'POST',
+                                        headers: {
+                                          'Accept': 'application/json'
+                                        }
+                                      })
+                                      .then(res => res.json())
+                                      .then(data => {
+                                        alert('Área actualizada: estado = ' + (data.estado === 1 ? 'Activo' : 'Inactivo'));
+                                        location.reload();
+                                      });
+                                    } return false;`}
+                                  >
+                                    {area.estado === 1 ? 'Desactivar' : 'Activar'}
+                                  </a>
+                                </li>
                               </ul>
                             </div>
                           </td>

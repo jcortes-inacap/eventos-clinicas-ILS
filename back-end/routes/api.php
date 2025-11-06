@@ -12,6 +12,8 @@ use App\Http\Controllers\UsuarioController;
 use App\Models\Rol;
 use App\Models\Carrera;
 use Illuminate\Http\Request;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+
 
 
 /*
@@ -74,5 +76,5 @@ Route::prefix('catalogos')->group(function() {
 ///Rutas de Areas y Carreras
 Route::apiResource('areas', AreaController::class);
 Route::apiResource('carreras', CarreraController::class);
-Route::post('/areas/{area}/toggle', [AreaController::class, 'toggleEstado']);
+Route::post('/areas/{id}/toggle', [AreaController::class, 'toggleEstadoPorId']);
 Route::put('/api/areas/{id}', [AreaController::class, 'update']);

@@ -107,18 +107,15 @@ class AreaController extends Controller
         return response()->json(['mensaje' => 'Área desactivada']);
     }
 
-    public function toggleEstado(Area $area)
+    public function toggleEstadoPorId($id)
     {
-        if ($area->estado === 1) {
-            $area->estado = 0;
-            $mensaje = 'Área desactivada';
-        } else {
-            $area->estado = 1;
-            $mensaje = 'Área activada';
-        }
-
+        $area = Area::findOrFail($id);
+        $area->estado = !$area->estado;
         $area->save();
 
-        return response()->json(['mensaje' => $mensaje]);
+        return response()->json([
+            'id' => $area->id_area,
+            'estado' => $area->estado,
+        ]);
     }
-}
+    }
