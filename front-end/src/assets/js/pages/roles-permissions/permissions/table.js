@@ -1,29 +1,29 @@
-import { getPathPrefix } from '../../../path-utils.js'
+import { getPathPrefix } from "../../../path-utils.js";
 
 // Class definition
 var PermissionsDatatable = (function () {
   // Shared variables
-  var dt
+  var dt;
 
   // Private functions
   var initDatatable = function () {
-    dt = $('#table_permissions').DataTable({
+    dt = $("#table_permissions").DataTable({
       searchDelay: 500,
-      processing: true,
-      order: [1, 'asc'],
+      processing: false,
+      order: [1, "asc"],
       lengthMenu: [5, 10, 50, 100],
       iDisplayLength: 5,
       select: {
-        style: 'multi',
+        style: "multi",
         selector: 'td:first-child input[type="checkbox"]',
-        className: 'row-selected'
+        className: "row-selected",
       },
       columnDefs: [
         {
           targets: 0,
           orderable: false,
           searchable: false,
-          className: 'select-checkbox',
+          className: "select-checkbox",
           render: function (data) {
             return `<div class="form-check">
                             <input
@@ -32,8 +32,8 @@ var PermissionsDatatable = (function () {
                             value={area.id_area}
                             data-row-id={area.id_area}
                           />
-                        </div>`
-          }
+                        </div>`;
+          },
         },
         {
           targets: 1,
@@ -43,450 +43,486 @@ var PermissionsDatatable = (function () {
         },
         {
           targets: 3,
-          },
-      ]
-    })
+        },
+      ],
+    });
 
     // Re-init functions on every table re-draw
-    dt.on('draw', function () {
-      initToggleToolbar()
-      toggleToolbars()
-      handleFilterData()
-      initRowDelete()
-    })
-  }
+    dt.on("draw", function () {
+      initToggleToolbar();
+      toggleToolbars();
+      handleFilterData();
+      initRowDelete();
+    });
+  };
 
   // Search Datatable
   var handleSearchDatatable = function () {
-    const filterSearch = document.querySelector('[data-table-filter="search"]')
-    filterSearch.addEventListener('keyup', function () {
-      if (this.value != '') {
-        $('.search-clear').show()
+    const filterSearch = document.querySelector('[data-table-filter="search"]');
+    filterSearch.addEventListener("keyup", function () {
+      if (this.value != "") {
+        $(".search-clear").show();
       } else {
-        $('.search-clear').hide()
+        $(".search-clear").hide();
       }
-      dt.search(this.value).draw()
-    })
+      dt.search(this.value).draw();
+    });
 
-    const filterSearchClear = document.querySelector('.search-clear')
-    filterSearchClear.addEventListener('click', function () {
-      $(this).hide()
-      $(this).closest('div').find('[data-table-filter="search"]').val('')
-      dt.search('').draw()
-    })
-  }
+    const filterSearchClear = document.querySelector(".search-clear");
+    filterSearchClear.addEventListener("click", function () {
+      $(this).hide();
+      $(this).closest("div").find('[data-table-filter="search"]').val("");
+      dt.search("").draw();
+    });
+  };
 
   // Filter Datatable
   var handleFilterDatatable = () => {
-    const filterButton = document.querySelector('[data-table-filter-btn="filter"]')
+    const filterButton = document.querySelector(
+      '[data-table-filter-btn="filter"]',
+    );
 
     // Filter datatable on submit
-    filterButton.addEventListener('click', function () {
-      $('.dataTables_wrapper').addClass('processing')
-      $('.dataTables_processing').css('display', 'block')
-      $.fn.dataTable.ext.search = []
-      handleFilterDataRows()
+    filterButton.addEventListener("click", function () {
+      $(".dataTables_wrapper").addClass("processing");
+      $(".dataTables_processing").css("display", "block");
+      $.fn.dataTable.ext.search = [];
+      handleFilterDataRows();
 
       // Trigger the dismiss click on the close button
-      document.querySelector('#filterDrawer [data-bs-dismiss="offcanvas"]').click()
-    })
-  }
+      document
+        .querySelector('#filterDrawer [data-bs-dismiss="offcanvas"]')
+        .click();
+    });
+  };
 
   // Handle filter data
   var handleFilterDataRows = () => {
     // Get all filter values
-    let statusFilters = []
-    let moduleFilter = $('#module').val()
-    let groupFilter = $('#group').val()
+    let statusFilters = [];
+    let moduleFilter = $("#module").val();
+    let groupFilter = $("#group").val();
 
     // Get checked status from filter drawer
     $('input[name="status"]:checked').each(function () {
-      statusFilters.push($(this).val())
-    })
+      statusFilters.push($(this).val());
+    });
 
     // Add custom filtering
     $.fn.dataTable.ext.search.push(function (_settings, data) {
-      let rowStatus = data[5]
-      let rowModule = data[3].toLowerCase()
-      let rowGroup = data[4].toLowerCase()
+      let rowStatus = data[5];
+      let rowModule = data[3].toLowerCase();
+      let rowGroup = data[4].toLowerCase();
 
       // Status filter
       let statusMatch =
         statusFilters.length === 0 ||
-        statusFilters.some((status) => rowStatus.toLowerCase() === status.toLowerCase())
+        statusFilters.some(
+          (status) => rowStatus.toLowerCase() === status.toLowerCase(),
+        );
 
       // Module filter
-      let moduleMatch = !moduleFilter || rowModule === moduleFilter.toLowerCase()
+      let moduleMatch =
+        !moduleFilter || rowModule === moduleFilter.toLowerCase();
 
       // Group filter
-      let groupMatch = !groupFilter || rowGroup === groupFilter.toLowerCase()
+      let groupMatch = !groupFilter || rowGroup === groupFilter.toLowerCase();
 
-      return statusMatch && moduleMatch && groupMatch
-    })
+      return statusMatch && moduleMatch && groupMatch;
+    });
 
     // Simulate loading delay
     setTimeout(function () {
-      dt.draw()
-      $('.dataTables_wrapper').removeClass('processing')
-      $('.dataTables_processing').css('display', 'none')
-    }, 500)
-  }
+      dt.draw();
+      $(".dataTables_wrapper").removeClass("processing");
+      $(".dataTables_processing").css("display", "none");
+    }, 500);
+  };
 
   // Reset Filter
   var handleResetForm = () => {
     // Select reset button
-    const resetButton = document.querySelector('[data-table-filter-btn="reset"]')
+    const resetButton = document.querySelector(
+      '[data-table-filter-btn="reset"]',
+    );
 
     // Reset datatable
-    resetButton.addEventListener('click', function () {
-      $('.dataTables_wrapper').addClass('processing')
-      $('.dataTables_processing').css('display', 'block')
+    resetButton.addEventListener("click", function () {
+      $(".dataTables_wrapper").addClass("processing");
+      $(".dataTables_processing").css("display", "block");
 
-      if ($('.form-check-input:checked').length > 0) {
-        $('.form-check-input').prop('checked', false)
+      if ($(".form-check-input:checked").length > 0) {
+        $(".form-check-input").prop("checked", false);
       }
-      if ($('#filterDrawer .form-select').length > 0) {
-        $('#filterDrawer .form-select').val('')
+      if ($("#filterDrawer .form-select").length > 0) {
+        $("#filterDrawer .form-select").val("");
       }
 
-      $('[data-table-filter="search"]').val('')
-      $('.search-clear').hide()
-      $('#module').val('')
-      $('#group').val('')
+      $('[data-table-filter="search"]').val("");
+      $(".search-clear").hide();
+      $("#module").val("");
+      $("#group").val("");
 
-      $.fn.dataTable.ext.search = [] // Remove all custom filters
+      $.fn.dataTable.ext.search = []; // Remove all custom filters
 
       // Simulate loading delay
       setTimeout(function () {
-        dt.draw()
-        $('.dataTables_wrapper').removeClass('processing')
-        $('.dataTables_processing').css('display', 'none')
-      }, 500)
+        dt.draw();
+        $(".dataTables_wrapper").removeClass("processing");
+        $(".dataTables_processing").css("display", "none");
+      }, 500);
 
       // Trigger the dismiss click on the close button
-      document.querySelector('#filterDrawer [data-bs-dismiss="offcanvas"]').click()
-    })
-  }
+      document
+        .querySelector('#filterDrawer [data-bs-dismiss="offcanvas"]')
+        .click();
+    });
+  };
 
   // Handle filter data display
   var handleFilterData = () => {
-    const filterDataView = document.querySelector('[data-filters]')
-    const filterData = document.querySelector('[data-filters-data]')
-    var search_html = ''
+    const filterDataView = document.querySelector("[data-filters]");
+    const filterData = document.querySelector("[data-filters-data]");
+    var search_html = "";
 
-    const filterSearch = document.querySelector('[data-table-filter="search"]')
-    var searchval = filterSearch.value
-    if (searchval != '') {
+    const filterSearch = document.querySelector('[data-table-filter="search"]');
+    var searchval = filterSearch.value;
+    if (searchval != "") {
       search_html +=
         '<span class="badge text-bg-primary d-flex justify-content-between fs-7 me-2 fw-bold align-items-center">Search: ' +
         searchval +
-        ' <span class="ri-close-line cursor-pointer fs-7 fw-bold ms-2 text-inverse clear-filter" data-type="input" data-filter="search"></span></span>'
+        ' <span class="ri-close-line cursor-pointer fs-7 fw-bold ms-2 text-inverse clear-filter" data-type="input" data-filter="search"></span></span>';
     }
 
     // Add status filters
     $('input[name="status"]:checked').each(function () {
-      var title = $(this).attr('data-title')
-      var val = $(this).val()
+      var title = $(this).attr("data-title");
+      var val = $(this).val();
       search_html +=
         '<span class="badge text-bg-primary d-flex justify-content-between fs-7 me-2 fw-bold align-items-center">Status: ' +
         title +
         ' <span class="ri-close-line cursor-pointer fs-7 fw-bold ms-2 text-inverse clear-filter" data-val="' +
         val +
-        '" data-type="checkbox" data-filter="status"></span></span>'
-    })
+        '" data-type="checkbox" data-filter="status"></span></span>';
+    });
 
     // Add module filter
-    var moduleVal = $('#module').val()
-    if (moduleVal != '') {
+    var moduleVal = $("#module").val();
+    if (moduleVal != "") {
       search_html +=
         '<span class="badge text-bg-primary d-flex justify-content-between fs-7 me-2 fw-bold align-items-center">Module: ' +
         moduleVal +
-        ' <span class="ri-close-line cursor-pointer fs-7 fw-bold ms-2 text-inverse clear-filter" data-type="select" data-filter="module"></span></span>'
+        ' <span class="ri-close-line cursor-pointer fs-7 fw-bold ms-2 text-inverse clear-filter" data-type="select" data-filter="module"></span></span>';
     }
 
     // Add group filter
-    var groupVal = $('#group').val()
-    if (groupVal != '') {
+    var groupVal = $("#group").val();
+    if (groupVal != "") {
       search_html +=
         '<span class="badge text-bg-primary d-flex justify-content-between fs-7 me-2 fw-bold align-items-center">Group: ' +
         groupVal +
-        ' <span class="ri-close-line cursor-pointer fs-7 fw-bold ms-2 text-inverse clear-filter" data-type="select" data-filter="group"></span></span>'
+        ' <span class="ri-close-line cursor-pointer fs-7 fw-bold ms-2 text-inverse clear-filter" data-type="select" data-filter="group"></span></span>';
     }
 
-    if (search_html != '') {
+    if (search_html != "") {
       // Create clear all button element
-      const clearAllButton = document.createElement('span')
+      const clearAllButton = document.createElement("span");
       clearAllButton.className =
-        'badge text-bg-danger fs-7 me-2 d-flex align-items-center fw-semibold cursor-pointer clear-filter'
-      clearAllButton.setAttribute('data-filter', 'all')
-      clearAllButton.textContent = 'Clear All'
+        "badge text-bg-danger fs-7 me-2 d-flex align-items-center fw-semibold cursor-pointer clear-filter";
+      clearAllButton.setAttribute("data-filter", "all");
+      clearAllButton.textContent = "Clear All";
 
       // Clear existing content
-      filterData.textContent = ''
+      filterData.textContent = "";
 
       // Add the search HTML content safely
-      const tempDiv = document.createElement('div')
-      tempDiv.innerHTML = search_html
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = search_html;
       while (tempDiv.firstChild) {
-        filterData.appendChild(tempDiv.firstChild)
+        filterData.appendChild(tempDiv.firstChild);
       }
 
       // Add the clear all button
-      filterData.appendChild(clearAllButton)
+      filterData.appendChild(clearAllButton);
 
-      filterDataView.classList.remove('d-none')
-      filterDataView.classList.add('d-flex')
-      clearFilters()
+      filterDataView.classList.remove("d-none");
+      filterDataView.classList.add("d-flex");
+      clearFilters();
     } else {
-      filterDataView.classList.remove('d-flex')
-      filterDataView.classList.add('d-none')
+      filterDataView.classList.remove("d-flex");
+      filterDataView.classList.add("d-none");
     }
-  }
+  };
 
   // Clear filters
   var clearFilters = function () {
-    if ($('.clear-filter').length > 0) {
-      $('.clear-filter').on('click', function () {
-        var filter = $(this).attr('data-filter')
-        var type = $(this).attr('data-type')
+    if ($(".clear-filter").length > 0) {
+      $(".clear-filter").on("click", function () {
+        var filter = $(this).attr("data-filter");
+        var type = $(this).attr("data-type");
 
-        if (filter == 'all') {
-          $('[data-table-filter="search"]').val('')
-          $('[data-table-filter]').each(function () {
-            var elementType = $(this).attr('data-type')
-            if (elementType == 'checkbox') {
-              $(this).prop('checked', false)
+        if (filter == "all") {
+          $('[data-table-filter="search"]').val("");
+          $("[data-table-filter]").each(function () {
+            var elementType = $(this).attr("data-type");
+            if (elementType == "checkbox") {
+              $(this).prop("checked", false);
             }
-          })
-          $('#module').val('')
-          $('#group').val('')
-          $('.search-clear').hide()
+          });
+          $("#module").val("");
+          $("#group").val("");
+          $(".search-clear").hide();
         } else {
-          if (type == 'checkbox') {
-            var val = $(this).attr('data-val')
-            var checkboxFilter = $('[data-table-filter="' + filter + '"]:checked')
+          if (type == "checkbox") {
+            var val = $(this).attr("data-val");
+            var checkboxFilter = $(
+              '[data-table-filter="' + filter + '"]:checked',
+            );
             checkboxFilter.each(function () {
               if ($(this).val() == val) {
-                $(this).prop('checked', false)
+                $(this).prop("checked", false);
               }
-            })
-          } else if (type == 'select') {
-            $('#' + filter).val('')
+            });
+          } else if (type == "select") {
+            $("#" + filter).val("");
           } else {
-            var otherFilter = $('[data-table-filter="' + filter + '"]')
-            otherFilter.val('')
+            var otherFilter = $('[data-table-filter="' + filter + '"]');
+            otherFilter.val("");
           }
         }
 
-        $('.dataTables_wrapper').addClass('processing')
-        $('.dataTables_processing').css('display', 'block')
-        $.fn.dataTable.ext.search = []
+        $(".dataTables_wrapper").addClass("processing");
+        $(".dataTables_processing").css("display", "block");
+        $.fn.dataTable.ext.search = [];
         setTimeout(function () {
-          handleFilterDataRows()
-          dt.draw()
-        }, 500)
-      })
+          handleFilterDataRows();
+          dt.draw();
+        }, 500);
+      });
     }
-  }
+  };
 
   // Init toggle toolbar
   var initToggleToolbar = function () {
     // Toggle selected action toolbar
-    const container = document.querySelector('#table_permissions')
-    const checkboxes = container.querySelectorAll('[type="checkbox"]')
+    const container = document.querySelector("#table_permissions");
+    const checkboxes = container.querySelectorAll('[type="checkbox"]');
 
     // Select all checkboxes
-    const selectAll = document.querySelector('[data-table-select="select_all"]')
-    selectAll.addEventListener('change', function (e) {
-      const checkboxes = container.querySelectorAll('[type="checkbox"]')
+    const selectAll = document.querySelector(
+      '[data-table-select="select_all"]',
+    );
+    selectAll.addEventListener("change", function (e) {
+      const checkboxes = container.querySelectorAll('[type="checkbox"]');
       checkboxes.forEach((c) => {
-        c.checked = e.target.checked
-      })
-      toggleToolbars()
-    })
+        c.checked = e.target.checked;
+      });
+      toggleToolbars();
+    });
 
     // Select elements
-    const deleteSelected = document.querySelector('[data-table-select="delete_selected"]')
+    const deleteSelected = document.querySelector(
+      '[data-table-select="delete_selected"]',
+    );
 
     // Toggle delete selected toolbar
     checkboxes.forEach((c) => {
       // Checkbox on click event
-      c.addEventListener('change', function () {
+      c.addEventListener("change", function () {
         setTimeout(function () {
-          toggleToolbars()
-        }, 50)
-      })
-    })
+          toggleToolbars();
+        }, 50);
+      });
+    });
 
     // Deleted selected rows
-    deleteSelected.addEventListener('click', function () {
-      const selectedIds = []
-      let modalTitleText = 'Delete Permissions'
-      let modalMsgText = 'Are you sure you want to delete selected permissions?'
-      let modalConfirmTextVal = 'Yes, delete it!'
-      let modalLoaderTextVal = 'Deleting...'
+    deleteSelected.addEventListener("click", function () {
+      const selectedIds = [];
+      let modalTitleText = "Delete Permissions";
+      let modalMsgText =
+        "Are you sure you want to delete selected permissions?";
+      let modalConfirmTextVal = "Yes, delete it!";
+      let modalLoaderTextVal = "Deleting...";
 
-      var selectedcheckboxes = container.querySelectorAll('[type="checkbox"]:checked')
+      var selectedcheckboxes = container.querySelectorAll(
+        '[type="checkbox"]:checked',
+      );
       selectedcheckboxes.forEach((sc) => {
-        selectedIds.push(sc.value)
-      })
+        selectedIds.push(sc.value);
+      });
 
-      $('#confirmationModal').on('show.bs.modal', function () {
-        var modal = $('#confirmationModal')
-        modal.find('.modal-body #confirm-yes').text(modalConfirmTextVal)
-        modal.find('.modal-body #modal-help-title').text(modalTitleText)
-        modal.find('.modal-body #modal-help-text').text(modalMsgText)
-        modal.find('.modal-help-content').find('.modal-help-icon').show()
-      })
+      $("#confirmationModal").on("show.bs.modal", function () {
+        var modal = $("#confirmationModal");
+        modal.find(".modal-body #confirm-yes").text(modalConfirmTextVal);
+        modal.find(".modal-body #modal-help-title").text(modalTitleText);
+        modal.find(".modal-body #modal-help-text").text(modalMsgText);
+        modal.find(".modal-help-content").find(".modal-help-icon").show();
+      });
 
-      $('#confirmationModal').modal('show')
+      $("#confirmationModal").modal("show");
 
-      $('#confirmationModal button#confirm-yes')
+      $("#confirmationModal button#confirm-yes")
         .off()
-        .on('click', function () {
-          var modal = $('#confirmationModal')
-          $(this).text(modalLoaderTextVal)
+        .on("click", function () {
+          var modal = $("#confirmationModal");
+          $(this).text(modalLoaderTextVal);
 
           setTimeout(function () {
-            modal.find('.modal-body #modal-buttons').removeClass('d-flex')
-            modal.find('.modal-body #modal-buttons').addClass('d-none')
-            modal.find('.modal-body #modal-help-title').addClass('text-success').text('Success')
+            modal.find(".modal-body #modal-buttons").removeClass("d-flex");
+            modal.find(".modal-body #modal-buttons").addClass("d-none");
             modal
-              .find('.modal-body #modal-help-text')
-              .text('Permissions have been deleted successfully.')
+              .find(".modal-body #modal-help-title")
+              .addClass("text-success")
+              .text("Success");
             modal
-              .find('.modal-help-content')
-              .find('.modal-help-icon')
-              .html('<span class="ri-checkbox-circle-line text-success"></span>')
-            modal.find('.modal-help-content').find('.modal-help-icon').show()
-          }, 1000)
+              .find(".modal-body #modal-help-text")
+              .text("Permissions have been deleted successfully.");
+            modal
+              .find(".modal-help-content")
+              .find(".modal-help-icon")
+              .html(
+                '<span class="ri-checkbox-circle-line text-success"></span>',
+              );
+            modal.find(".modal-help-content").find(".modal-help-icon").show();
+          }, 1000);
 
           setTimeout(function () {
-            $('#confirmationModal').modal('hide')
-            modal.find('.modal-body #modal-buttons').removeClass('d-none')
-            modal.find('.modal-body #modal-buttons').addClass('d-flex')
-          }, 3000)
-        })
+            $("#confirmationModal").modal("hide");
+            modal.find(".modal-body #modal-buttons").removeClass("d-none");
+            modal.find(".modal-body #modal-buttons").addClass("d-flex");
+          }, 3000);
+        });
 
-      $('#confirmationModal button#confirm-no')
+      $("#confirmationModal button#confirm-no")
         .off()
-        .on('click', function () {
-          $('#confirmationModal').modal('hide')
-        })
-    })
-  }
+        .on("click", function () {
+          $("#confirmationModal").modal("hide");
+        });
+    });
+  };
 
   // Toggle toolbars
   var toggleToolbars = function () {
     // Define variables
-    const container = document.querySelector('#table_permissions')
-    const toolbarBase = document.querySelector('[data-table-toolbar="filter"]')
-    const toolbarSelected = document.querySelector('[data-table-toolbar="bulk_selected"]')
-    const selectedCount = document.querySelector('[data-table-select="selected_count"]')
+    const container = document.querySelector("#table_permissions");
+    const toolbarBase = document.querySelector('[data-table-toolbar="filter"]');
+    const toolbarSelected = document.querySelector(
+      '[data-table-toolbar="bulk_selected"]',
+    );
+    const selectedCount = document.querySelector(
+      '[data-table-select="selected_count"]',
+    );
 
     // Select refreshed checkbox DOM elements
-    const allCheckboxes = container.querySelectorAll('tbody [type="checkbox"]')
+    const allCheckboxes = container.querySelectorAll('tbody [type="checkbox"]');
 
     // Detect checkboxes state & count
-    let checkedState = false
-    let count = 0
+    let checkedState = false;
+    let count = 0;
 
     // Count checked boxes
     allCheckboxes.forEach((c) => {
       if (c.checked) {
-        checkedState = true
-        count++
+        checkedState = true;
+        count++;
       }
-    })
+    });
 
-    const selectAll = document.querySelector('[data-table-select="select_all"]')
+    const selectAll = document.querySelector(
+      '[data-table-select="select_all"]',
+    );
     if (allCheckboxes.length == count) {
-      selectAll.checked = true
+      selectAll.checked = true;
     } else {
-      selectAll.checked = false
+      selectAll.checked = false;
     }
 
     // Toggle toolbars
     if (checkedState) {
-      selectedCount.innerHTML = count
-      toolbarBase.classList.add('d-none')
-      toolbarSelected.classList.remove('d-none')
+      selectedCount.innerHTML = count;
+      toolbarBase.classList.add("d-none");
+      toolbarSelected.classList.remove("d-none");
     } else {
-      toolbarBase.classList.remove('d-none')
-      toolbarSelected.classList.add('d-none')
+      toolbarBase.classList.remove("d-none");
+      toolbarSelected.classList.add("d-none");
     }
-  }
+  };
 
   // Init single delete button
   var initRowDelete = function () {
-    if ($('.delete-button').length > 0) {
-      $('.delete-button').on('click', function (e) {
-        e.preventDefault()
+    if ($(".delete-button").length > 0) {
+      $(".delete-button").on("click", function (e) {
+        e.preventDefault();
 
-        const $title = 'Delete Permission'
-        const $msg = 'Are you sure you want to delete this permission?'
-        const $confirmButtonText = 'Yes, delete it!'
-        const $loaderButtonText = 'Deleting...'
+        const $title = "Delete Permission";
+        const $msg = "Are you sure you want to delete this permission?";
+        const $confirmButtonText = "Yes, delete it!";
+        const $loaderButtonText = "Deleting...";
 
-        $('#confirmationModal').on('show.bs.modal', function () {
-          var modal = $('#confirmationModal')
-          modal.find('.modal-body #confirm-yes').text($confirmButtonText)
-          modal.find('.modal-body #modal-help-title').text($title)
-          modal.find('.modal-body #modal-help-text').text($msg)
-          modal.find('.modal-help-content').find('.modal-help-icon').show()
-        })
+        $("#confirmationModal").on("show.bs.modal", function () {
+          var modal = $("#confirmationModal");
+          modal.find(".modal-body #confirm-yes").text($confirmButtonText);
+          modal.find(".modal-body #modal-help-title").text($title);
+          modal.find(".modal-body #modal-help-text").text($msg);
+          modal.find(".modal-help-content").find(".modal-help-icon").show();
+        });
 
-        $('#confirmationModal').modal('show')
+        $("#confirmationModal").modal("show");
 
-        $('#confirmationModal button#confirm-yes')
+        $("#confirmationModal button#confirm-yes")
           .off()
-          .on('click', function () {
-            var modal = $('#confirmationModal')
-            $(this).text($loaderButtonText)
+          .on("click", function () {
+            var modal = $("#confirmationModal");
+            $(this).text($loaderButtonText);
 
             setTimeout(function () {
-              modal.find('.modal-body #modal-buttons').removeClass('d-flex')
-              modal.find('.modal-body #modal-buttons').addClass('d-none')
-              modal.find('.modal-body #modal-help-title').addClass('text-success').text('Success')
+              modal.find(".modal-body #modal-buttons").removeClass("d-flex");
+              modal.find(".modal-body #modal-buttons").addClass("d-none");
               modal
-                .find('.modal-body #modal-help-text')
-                .text('Permission has been deleted successfully.')
+                .find(".modal-body #modal-help-title")
+                .addClass("text-success")
+                .text("Success");
               modal
-                .find('.modal-help-content')
-                .find('.modal-help-icon')
-                .html('<span class="ri-checkbox-circle-line text-success"></span>')
-              modal.find('.modal-help-content').find('.modal-help-icon').show()
-            }, 1000)
+                .find(".modal-body #modal-help-text")
+                .text("Permission has been deleted successfully.");
+              modal
+                .find(".modal-help-content")
+                .find(".modal-help-icon")
+                .html(
+                  '<span class="ri-checkbox-circle-line text-success"></span>',
+                );
+              modal.find(".modal-help-content").find(".modal-help-icon").show();
+            }, 1000);
 
             setTimeout(function () {
-              $('#confirmationModal').modal('hide')
-              modal.find('.modal-body #modal-buttons').removeClass('d-none')
-              modal.find('.modal-body #modal-buttons').addClass('d-flex')
-            }, 3000)
-          })
+              $("#confirmationModal").modal("hide");
+              modal.find(".modal-body #modal-buttons").removeClass("d-none");
+              modal.find(".modal-body #modal-buttons").addClass("d-flex");
+            }, 3000);
+          });
 
-        $('#confirmationModal button#confirm-no')
+        $("#confirmationModal button#confirm-no")
           .off()
-          .on('click', function () {
-            $('#confirmationModal').modal('hide')
-          })
-      })
+          .on("click", function () {
+            $("#confirmationModal").modal("hide");
+          });
+      });
     }
-  }
+  };
 
   // Public methods
   return {
     init: function () {
-      initDatatable()
-      handleSearchDatatable()
-      handleFilterDatatable()
-      handleResetForm()
-      initToggleToolbar()
-    }
-  }
-})()
+      initDatatable();
+      handleSearchDatatable();
+      handleFilterDatatable();
+      handleResetForm();
+      initToggleToolbar();
+    },
+  };
+})();
 
 // On document ready
-document.addEventListener('DOMContentLoaded', () => {
-  PermissionsDatatable.init()
-})
+document.addEventListener("DOMContentLoaded", () => {
+  PermissionsDatatable.init();
+});
