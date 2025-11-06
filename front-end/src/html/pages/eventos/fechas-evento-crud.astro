@@ -1,0 +1,928 @@
+---
+import AdminLayout from '../../layouts/admin/admin-layout.astro'
+import PageHeader from '../../components/common/page-header.astro'
+import type { Props as PageHeaderProps } from '../../components/common/page-header.astro'
+import { getPathPrefix } from '../../../utils/path.js'
+import { ApiService } from '../../../services/api.js'
+
+// Obtener datos reales desde la API
+let fechasEvento = []
+let hasError = false
+
+try {
+  const response = await ApiService.getFechasEvento()
+  fechasEvento = response.data || []
+} catch (error) {
+  console.error('Error fetching fechas evento:', error)
+  hasError = true
+}
+
+const fechasEventoPageConfig: PageHeaderProps = {
+  title: 'Gestión de Fechas de Eventos',
+  breadcrumbs: [
+    { label: 'Dashboard', href: getPathPrefix('/dashboard'), class: '' },
+    { label: 'Other Pages', class: '' },
+    { label: 'Fechas de Eventos CRUD', class: 'active' }
+  ]
+}
+---
+
+<AdminLayout
+  title="Gestión de Fechas de Eventos"
+  description="Administración de fechas de eventos del sistema"
+  currentPath="/others/fechas-evento-crud"
+>
+  <PageHeader {...fechasEventoPageConfig} />
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">Lista de Fechas de Eventos</h5>
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addFechaEventoModal">
+            <i class="ri-add-line me-1"></i> Nueva Fecha
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-md-8">
+              <div class="input-group">
+                <span class="input-group-text">
+                  <i class="ri-search-line"></i>
+                </span>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  id="searchInput" 
+                  placeholder="Buscar por evento o fecha..."
+                >
+              </div>
+            </div>
+            <div class="col-md-4 text-end">
+              <button class="btn btn-outline-secondary" id="sortButton">
+                <i class="ri-sort-desc"></i> Ordenar por Fecha ↓
+              </button>
+            </div>
+          </div>
+
+          {hasError ? (
+            <div class="alert alert-danger" role="alert">
+              <i class="ri-error-warning-line me-2"></i>
+              Error al cargar las fechas de eventos. Por favor, intente nuevamente.
+            </div>
+          ) : fechasEvento.length === 0 ? (
+            <div class="alert alert-info" role="alert">
+              <i class="ri-information-line me-2"></i>
+              No hay fechas de eventos registradas en el sistema.
+            </div>
+          ) : (
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead class="table">
+                  <tr>
+                    <th>ID</th>
+                    <th>Evento</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th class="text-end">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="fechasEventoTableBody">
+                  {fechasEvento
+                    .sort((a, b) => {
+                      // Ordenar por fecha de menor a mayor (más antigua primero)
+                      const fechaA = new Date(a.fecha.split('T')[0])
+                      const fechaB = new Date(b.fecha.split('T')[0])
+                      return fechaA - fechaB
+                    })
+                    .map((fechaEvento, index) => {
+                    // Parsear fecha correctamente sin ajuste de zona horaria
+                    // Manejar tanto formato "YYYY-MM-DD" como objeto Date
+                    let fecha
+                    let fechaString = ''
+                    
+                    try {
+                      if (typeof fechaEvento.fecha === 'string') {
+                        // Formato esperado: "YYYY-MM-DD"
+                        const fechaParts = fechaEvento.fecha.split('T')[0].split('-')
+                        if (fechaParts.length === 3) {
+                          const [year, month, day] = fechaParts.map(Number)
+                          fecha = new Date(year, month - 1, day)
+                          fechaString = fechaEvento.fecha.split('T')[0]
+                        } else {
+                          fecha = new Date()
+                        }
+                      } else {
+                        fecha = new Date()
+                      }
+                    } catch (e) {
+                      fecha = new Date()
+                      fechaString = ''
+                    }
+                    
+                    const hoy = new Date()
+                    hoy.setHours(0, 0, 0, 0)
+                    const esHoy = fecha.getTime() === hoy.getTime()
+                    const esFutura = fecha > hoy
+                    const esPasada = fecha < hoy
+                    
+                    return (
+                      <tr>
+                        <td>
+                          <div class="d-flex flex-column">
+                            <span class="text-muted" style="width: fit-content;">#{index + 1}</span>
+                          </div>
+                        </td>
+                        <td>
+                          <div>
+                            <div class="fw-medium">
+                              {fechaEvento.evento?.titulo || 'Sin evento'}
+                            </div>
+                            <small class="text-muted">
+                              ID Evento: #{fechaEvento.id_evento}
+                            </small>
+                          </div>
+                        </td>
+                        <td>
+                          <div class="d-flex align-items-center">
+                            <i class="ri-calendar-line me-2"></i>
+                            <span>{fecha.toLocaleDateString('es-ES', { 
+                              year: 'numeric', 
+                              month: 'long', 
+                              day: 'numeric' 
+                            })}</span>
+                          </div>
+                        </td>
+                        <td>
+                          {esHoy ? (
+                            <span class="badge bg-primary">
+                              <i class="ri-calendar-check-line me-1"></i>
+                              Hoy
+                            </span>
+                          ) : esFutura ? (
+                            <span class="badge bg-success">
+                              <i class="ri-calendar-event-line me-1"></i>
+                              Próxima
+                            </span>
+                          ) : (
+                            <span class="badge bg-secondary">
+                              <i class="ri-calendar-line me-1"></i>
+                              Pasada
+                            </span>
+                          )}
+                        </td>
+                        <td class="text-end">
+                            <button 
+                              class="btn btn-sm btn-light me-2 edit-fecha" 
+                              data-fecha-id={fechaEvento.id_fecha}
+                              data-fecha={fechaString}
+                              title="Editar"
+                            >
+                              <i class="ri-edit-line"></i>
+                            </button>
+                            <button 
+                              class="btn btn-sm btn-danger delete-fecha" 
+                              data-fecha-id={fechaEvento.id_fecha}
+                              data-fecha-evento={fechaEvento.evento?.titulo || 'Sin nombre'}
+                              data-fecha-date={fecha.toLocaleDateString('es-ES')}
+                              title="Eliminar"
+                            >
+                              <i class="ri-delete-bin-line"></i>
+                            </button>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          <div class="d-flex justify-content-between align-items-center mt-3">
+            <div>
+              <span id="paginationInfo" class="text-muted"></span>
+            </div>
+            <nav>
+              <ul class="pagination mb-0" id="pagination"></ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Agregar Fecha de Evento -->
+  <div class="modal fade" id="addFechaEventoModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Nueva Fecha de Evento</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+  <form id="addFechaEventoForm" novalidate>
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-12">
+                <label for="add_id_evento" class="form-label">Evento <span class="text-danger">*</span></label>
+                <select class="form-select" id="add_id_evento" name="id_evento" required>
+                  <option value="">Cargando eventos...</option>
+                </select>
+                <small class="text-muted">Seleccione el evento al que pertenece esta fecha</small>
+              </div>
+              <div class="col-12">
+                <label for="add_fecha" class="form-label">Fecha <span class="text-danger">*</span></label>
+                <input type="date" class="form-control" id="add_fecha" name="fecha" required>
+                <small class="text-muted">La fecha no puede ser anterior a hoy</small>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary" id="addFechaEventoBtn">
+              <i class="ri-save-line me-1"></i> Guardar Fecha
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Editar Fecha de Evento -->
+  <div class="modal fade" id="editFechaEventoModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Editar Fecha de Evento</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="editModalBody">
+          <!-- El contenido se carga dinámicamente -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="saveChangesBtn">Guardar cambios</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de confirmación para eliminar -->
+  <div class="modal fade" id="deleteConfirmModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title text-danger">
+            <i class="ri-error-warning-line me-2"></i>
+            Confirmar Eliminación
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p>¿Está seguro que desea eliminar la fecha <strong id="deleteFechaDate"></strong> del evento <strong id="deleteFechaEvento"></strong>?</p>
+          <div class="alert alert-warning">
+            <i class="ri-alert-line me-2"></i>
+            Esta acción eliminará permanentemente la fecha y no se puede deshacer.
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+            <i class="ri-delete-bin-line me-1"></i>
+            Eliminar Fecha
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script inline -->
+  <script type="module">
+    import Swal from 'https://cdn.jsdelivr.net/npm/sweetalert2@11/+esm'
+    import { ApiService } from '/src/services/api.js'
+
+    // Variables globales
+    let currentFechaId = null
+    let fechaToDelete = null
+    let currentPage = 1
+    const itemsPerPage = 10
+    let filteredRows = []
+    let eventos = [] // Cache de eventos
+
+    const tableBody = document.getElementById('fechasEventoTableBody')
+    const allRows = tableBody ? [...tableBody.querySelectorAll('tr')] : []
+
+    // Función auxiliar para parsear fechas correctamente (sin ajuste de zona horaria)
+    const parseFecha = (fechaString) => {
+      if (!fechaString) return new Date()
+      
+      try {
+        // Eliminar la parte de tiempo si existe (T00:00:00)
+        const fechaSolo = fechaString.split('T')[0]
+        const [year, month, day] = fechaSolo.split('-').map(Number)
+        
+        if (!year || !month || !day) {
+          console.warn('Fecha inválida:', fechaString)
+          return new Date()
+        }
+        
+        return new Date(year, month - 1, day)
+      } catch (error) {
+        console.error('Error parseando fecha:', fechaString, error)
+        return new Date()
+      }
+    }
+
+    // Función auxiliar para formatear fecha a YYYY-MM-DD
+    const formatFecha = (fecha) => {
+      if (!(fecha instanceof Date)) return ''
+      
+      const year = fecha.getFullYear()
+      const month = String(fecha.getMonth() + 1).padStart(2, '0')
+      const day = String(fecha.getDate()).padStart(2, '0')
+      
+      return `${year}-${month}-${day}`
+    }
+
+    // Funciones de utilidad para UX
+    const showLoading = (element, text = 'Cargando...') => {
+      element.innerHTML = `
+        <div class="d-flex align-items-center justify-content-center" style="min-height: 200px;">
+          <div class="spinner-border text-primary me-2" role="status">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
+          <span>${text}</span>
+        </div>
+      `
+    }
+
+    const showFieldAlert = (message, fieldId = null) => {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Revisa los campos',
+        text: message,
+        confirmButtonText: 'Entendido'
+      }).then(() => {
+        if (fieldId) {
+          const field = document.getElementById(fieldId)
+          if (field) {
+            field.focus()
+          }
+        }
+      })
+    }
+
+    const showRequestError = (title, message) => {
+      Swal.fire({
+        icon: 'error',
+        title,
+        text: message,
+        confirmButtonText: 'Cerrar'
+      })
+    }
+
+    const toggleFormInputs = (disabled) => {
+      const inputs = document.querySelectorAll('#editFechaEventoModal input, #editFechaEventoModal select')
+      inputs.forEach(input => {
+        input.disabled = disabled
+      })
+    }
+
+    const toggleSaveButton = (disabled, text = 'Guardar cambios') => {
+      const saveBtn = document.getElementById('saveChangesBtn')
+      if (saveBtn) {
+        saveBtn.disabled = disabled
+        if (disabled && text === 'Guardando...') {
+          saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Guardando...'
+        } else {
+          saveBtn.innerHTML = text
+        }
+      }
+    }
+
+    // Función para cargar eventos
+    const loadEventos = async () => {
+      if (eventos.length > 0) {
+        return eventos // Retornar cache si ya están cargados
+      }
+
+      try {
+        const response = await ApiService.getEventos()
+        eventos = response.data || []
+        return eventos
+      } catch (error) {
+        console.error('Error al cargar eventos:', error)
+        return []
+      }
+    }
+
+    // Función para poblar el select de eventos
+    const populateEventosSelect = (selectElement, selectedId = null) => {
+      if (!selectElement) return
+
+      // Limpiar opciones existentes
+      selectElement.innerHTML = '<option value="">Seleccione un evento...</option>'
+
+      // Agregar opciones de eventos (solo eventos activos)
+      eventos.filter(evento => evento.estado === 1).forEach(evento => {
+        const option = document.createElement('option')
+        option.value = evento.id_evento
+        option.textContent = `${evento.titulo} - ${evento.modalidad?.toUpperCase()}`
+        
+        if (selectedId && evento.id_evento === selectedId) {
+          option.selected = true
+        }
+        
+        selectElement.appendChild(option)
+      })
+    }
+
+    // Función para mostrar alerta de éxito
+    const showSuccessAlert = (message, callback) => {
+      const alertHtml = `
+        <div class="modal fade" id="successModal" tabindex="-1">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-body text-center py-4">
+                <i class="ri-checkbox-circle-line text-success" style="font-size: 3rem;"></i>
+                <h5 class="mt-3">${message}</h5>
+              </div>
+              <div class="modal-footer border-0 justify-content-center">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `
+
+      document.body.insertAdjacentHTML('beforeend', alertHtml)
+      const successModal = new bootstrap.Modal(document.getElementById('successModal'))
+
+      document.getElementById('successModal').addEventListener('hidden.bs.modal', () => {
+        document.getElementById('successModal').remove()
+        if (callback) callback()
+      })
+
+      successModal.show()
+    }
+
+    const createFormHTML = () => {
+      return `
+        <form id="editFechaEventoForm" novalidate>
+          <div class="row g-3">
+            <div class="col-12">
+              <label for="edit_id_evento" class="form-label">Evento <span class="text-danger">*</span></label>
+              <select class="form-select" id="edit_id_evento" name="id_evento" required>
+                <option value="">Seleccione un evento...</option>
+              </select>
+              <small class="text-muted">Seleccione el evento al que pertenece esta fecha</small>
+            </div>
+            <div class="col-12">
+              <label for="edit_fecha" class="form-label">Fecha <span class="text-danger">*</span></label>
+              <input type="date" class="form-control" id="edit_fecha" name="fecha" required>
+              <small class="text-muted">La fecha no puede ser anterior a hoy</small>
+            </div>
+          </div>
+        </form>
+      `
+    }
+
+    // Función para limpiar el backdrop y resetear modales
+    const cleanupModal = () => {
+      const backdrop = document.querySelector('.modal-backdrop')
+      if (backdrop) {
+        backdrop.remove()
+      }
+      document.body.classList.remove('modal-open')
+      document.body.style.overflow = ''
+      document.body.style.paddingRight = ''
+    }
+
+    // Función de paginación
+    const updatePagination = () => {
+      const totalPages = Math.ceil(filteredRows.length / itemsPerPage)
+      const pagination = document.getElementById('pagination')
+      const paginationInfo = document.getElementById('paginationInfo')
+
+      if (!pagination || !paginationInfo) return
+
+      if (totalPages <= 1) {
+        pagination.innerHTML = ''
+        paginationInfo.textContent = `Mostrando ${filteredRows.length} fechas`
+        return
+      }
+
+      let paginationHTML = ''
+
+      // Botón anterior
+      paginationHTML += `
+        <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+          <a class="page-link" href="#" data-page="${currentPage - 1}">
+            <i class="ri-arrow-left-s-line"></i>
+          </a>
+        </li>
+      `
+
+      // Números de página
+      for (let i = 1; i <= totalPages; i++) {
+        paginationHTML += `
+          <li class="page-item ${currentPage === i ? 'active' : ''}">
+            <a class="page-link" href="#" data-page="${i}">${i}</a>
+          </li>
+        `
+      }
+
+      // Botón siguiente
+      paginationHTML += `
+        <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+          <a class="page-link" href="#" data-page="${currentPage + 1}">
+            <i class="ri-arrow-right-s-line"></i>
+          </a>
+        </li>
+      `
+
+      pagination.innerHTML = paginationHTML
+
+      // Info de paginación
+      const startItem = (currentPage - 1) * itemsPerPage + 1
+      const endItem = Math.min(currentPage * itemsPerPage, filteredRows.length)
+      paginationInfo.textContent = `Mostrando ${startItem}-${endItem} de ${filteredRows.length} fechas`
+    }
+
+    const showPage = (page) => {
+      currentPage = page
+      const startIndex = (page - 1) * itemsPerPage
+      const endIndex = startIndex + itemsPerPage
+
+      // Ocultar todas las filas
+      allRows.forEach(row => row.style.display = 'none')
+
+      // Mostrar filas de la página actual y renumerar
+      filteredRows.slice(startIndex, endIndex).forEach((row, index) => {
+        row.style.display = ''
+        
+        // Actualizar el número ficticio en la primera columna
+        const badgeContainer = row.querySelector('td:first-child .badge')
+        if (badgeContainer) {
+          badgeContainer.textContent = `#${startIndex + index + 1}`
+        }
+      })
+
+      updatePagination()
+    }
+
+    // Inicializar paginación
+    if (allRows.length > 0) {
+      filteredRows = [...allRows]
+      showPage(1)
+    }
+
+    // Event listeners para paginación
+    document.addEventListener('click', function(e) {
+      if (e.target.closest('.page-link')) {
+        e.preventDefault()
+        const page = parseInt(e.target.closest('.page-link').dataset.page)
+        if (page && page !== currentPage && page >= 1 && page <= Math.ceil(filteredRows.length / itemsPerPage)) {
+          showPage(page)
+        }
+      }
+    })
+
+    // Manejadores de modal
+    const modalCancelButtons = document.querySelectorAll('[data-bs-dismiss="modal"]')
+    modalCancelButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        cleanupModal()
+      })
+    })
+
+    const modals = document.querySelectorAll('.modal')
+    modals.forEach(modal => {
+      modal.addEventListener('hidden.bs.modal', () => {
+        cleanupModal()
+        toggleFormInputs(false)
+        toggleSaveButton(false)
+      })
+    })
+
+    // Establecer fecha mínima a hoy (en hora local, no UTC)
+    const setMinDate = () => {
+      const today = new Date()
+      const todayString = formatFecha(today)
+      
+      const addFechaInput = document.getElementById('add_fecha')
+      if (addFechaInput) {
+        addFechaInput.setAttribute('min', todayString)
+      }
+    }
+
+    // Lógica para agregar nueva fecha de evento
+    const addFechaEventoForm = document.getElementById('addFechaEventoForm')
+    const addFechaEventoModal = document.getElementById('addFechaEventoModal')
+    
+    // Cargar eventos cuando se abre el modal de agregar
+    if (addFechaEventoModal) {
+      addFechaEventoModal.addEventListener('show.bs.modal', async function() {
+        const selectEvento = document.getElementById('add_id_evento')
+        
+        // Cargar eventos
+        if (selectEvento) {
+          selectEvento.innerHTML = '<option value="">Cargando eventos...</option>'
+          selectEvento.disabled = true
+          
+          await loadEventos()
+          populateEventosSelect(selectEvento)
+          selectEvento.disabled = false
+        }
+
+        // Establecer fecha mínima
+        setMinDate()
+      })
+    }
+    
+    if (addFechaEventoForm) {
+      addFechaEventoForm.addEventListener('submit', async function(e) {
+        e.preventDefault()
+
+        const addBtn = document.getElementById('addFechaEventoBtn')
+        const originalText = addBtn ? addBtn.innerHTML : ''
+
+        const formData = new FormData(this)
+
+        const idEventoValue = (formData.get('id_evento') || '').trim()
+        if (!idEventoValue) {
+          showFieldAlert('Seleccione el evento al que pertenece la fecha.', 'add_id_evento')
+          return
+        }
+
+        const fechaValue = (formData.get('fecha') || '').trim()
+        if (!fechaValue) {
+          showFieldAlert('Seleccione una fecha válida.', 'add_fecha')
+          return
+        }
+
+        const idEventoNumber = parseInt(idEventoValue, 10)
+        if (Number.isNaN(idEventoNumber)) {
+          showFieldAlert('El evento seleccionado no es válido.', 'add_id_evento')
+          return
+        }
+
+        const selectedDate = parseFecha(fechaValue)
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+
+        if (selectedDate < today) {
+          showFieldAlert('La fecha no puede ser anterior a hoy.', 'add_fecha')
+          return
+        }
+
+        if (addBtn) {
+          addBtn.disabled = true
+          addBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando...'
+        }
+
+        const data = {
+          id_evento: idEventoNumber,
+          fecha: fechaValue
+        }
+
+        const resetAddButton = () => {
+          if (addBtn) {
+            addBtn.disabled = false
+            addBtn.innerHTML = originalText
+          }
+        }
+
+        try {
+          await ApiService.createFechaEvento(data)
+          
+          const modal = bootstrap.Modal.getInstance(document.getElementById('addFechaEventoModal'))
+          modal.hide()
+
+          showSuccessAlert('Fecha de evento creada exitosamente', () => {
+            window.location.reload()
+          })
+        } catch (error) {
+          console.error('Error:', error)
+          const apiMessage = error?.response?.data?.message || 'Ocurrió un problema al crear la fecha de evento.'
+          showRequestError('No se pudo crear la fecha de evento', apiMessage)
+          resetAddButton()
+        }
+      })
+    }
+
+    // Lógica para el modal de edición
+    const editModal = document.getElementById('editFechaEventoModal')
+    const editButtons = document.querySelectorAll('.edit-fecha')
+
+    editButtons.forEach(button => {
+      button.addEventListener('click', async function() {
+        currentFechaId = this.getAttribute('data-fecha-id')
+
+        const modal = new bootstrap.Modal(editModal)
+        modal.show()
+
+        const modalBody = document.getElementById('editModalBody')
+        showLoading(modalBody, 'Cargando datos de la fecha...')
+        toggleSaveButton(true, 'Cargando...')
+
+        try {
+          // Cargar eventos y fecha en paralelo
+          const [response] = await Promise.all([
+            ApiService.getFechaEvento(currentFechaId),
+            loadEventos()
+          ])
+          
+          const fechaEvento = response.data
+
+          modalBody.innerHTML = createFormHTML()
+
+          // Poblar select de eventos con el valor seleccionado
+          const selectEvento = document.getElementById('edit_id_evento')
+          populateEventosSelect(selectEvento, fechaEvento.id_evento)
+
+          // Establecer fecha
+          const fechaInput = document.getElementById('edit_fecha')
+          // Asegurarse de que la fecha esté en formato YYYY-MM-DD
+          const fechaValue = fechaEvento.fecha.split('T')[0]
+          fechaInput.value = fechaValue
+          
+          // Establecer fecha mínima a hoy (en hora local, no UTC)
+          const today = new Date()
+          const todayString = formatFecha(today)
+          fechaInput.setAttribute('min', todayString)
+
+          toggleSaveButton(false)
+        } catch (error) {
+          modalBody.innerHTML = `
+            <div class="alert alert-danger">
+              <i class="ri-error-warning-line me-2"></i>
+              Error al cargar los datos de la fecha de evento
+            </div>
+          `
+          toggleSaveButton(true)
+        }
+      })
+    })
+
+    // Manejador para guardar cambios
+    document.addEventListener('click', async function(e) {
+      if (e.target && e.target.id === 'saveChangesBtn') {
+        if (!currentFechaId) return
+
+        const idEventoValue = document.getElementById('edit_id_evento').value
+        if (!idEventoValue) {
+          showFieldAlert('Seleccione el evento al que pertenece la fecha.', 'edit_id_evento')
+          return
+        }
+
+        const fechaValue = document.getElementById('edit_fecha').value.trim()
+        if (!fechaValue) {
+          showFieldAlert('Seleccione una fecha válida.', 'edit_fecha')
+          return
+        }
+
+        const idEventoNumber = parseInt(idEventoValue, 10)
+        if (Number.isNaN(idEventoNumber)) {
+          showFieldAlert('El evento seleccionado no es válido.', 'edit_id_evento')
+          return
+        }
+
+        const selectedDate = parseFecha(fechaValue)
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        
+        if (selectedDate < today) {
+          showFieldAlert('La fecha no puede ser anterior a hoy.', 'edit_fecha')
+          return
+        }
+
+        toggleFormInputs(true)
+        toggleSaveButton(true, 'Guardando...')
+
+        const formData = {
+          id_evento: idEventoNumber,
+          fecha: fechaValue
+        }
+
+        try {
+          await ApiService.updateFechaEvento(currentFechaId, formData)
+
+          const modal = bootstrap.Modal.getInstance(editModal)
+          modal.hide()
+
+          showSuccessAlert('Fecha de evento actualizada exitosamente', () => {
+            window.location.reload()
+          })
+        } catch (error) {
+          console.error('Error:', error)
+          const apiMessage = error?.response?.data?.message || 'Ocurrió un problema al actualizar la fecha de evento.'
+          showRequestError('No se pudo actualizar la fecha de evento', apiMessage)
+          toggleFormInputs(false)
+          toggleSaveButton(false)
+        }
+      }
+
+      // Manejador para eliminar fecha
+      if (e.target.closest('.delete-fecha')) {
+        const button = e.target.closest('.delete-fecha')
+        fechaToDelete = {
+          id: button.getAttribute('data-fecha-id'),
+          evento: button.getAttribute('data-fecha-evento'),
+          date: button.getAttribute('data-fecha-date')
+        }
+
+        document.getElementById('deleteFechaEvento').textContent = fechaToDelete.evento
+        document.getElementById('deleteFechaDate').textContent = fechaToDelete.date
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'))
+        deleteModal.show()
+      }
+
+      // Confirmar eliminación
+      if (e.target && e.target.id === 'confirmDeleteBtn') {
+        if (!fechaToDelete) return
+
+        const originalText = e.target.innerHTML
+        e.target.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Eliminando...'
+        e.target.disabled = true
+
+        try {
+          await ApiService.deleteFechaEvento(fechaToDelete.id)
+
+          const modal = bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal'))
+          modal.hide()
+
+          showSuccessAlert('Fecha de evento eliminada exitosamente', () => {
+            window.location.reload()
+          })
+        } catch (error) {
+          console.error('Error:', error)
+          const apiMessage = error?.response?.data?.message || 'Ocurrió un problema al eliminar la fecha de evento.'
+          showRequestError('No se pudo eliminar la fecha de evento', apiMessage)
+          e.target.innerHTML = originalText
+          e.target.disabled = false
+        }
+      }
+    })
+
+    // Funcionalidad de búsqueda
+    const searchInput = document.getElementById('searchInput')
+    if (searchInput && allRows.length > 0) {
+      searchInput.addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase()
+
+        filteredRows = allRows.filter(row => {
+          const evento = row.querySelector('td:nth-child(2)')?.textContent.toLowerCase() || ''
+          const fecha = row.querySelector('td:nth-child(3)')?.textContent.toLowerCase() || ''
+          return evento.includes(searchTerm) || fecha.includes(searchTerm)
+        })
+
+        // Renumerar después de filtrar
+        filteredRows.forEach((row, index) => {
+          const badgeContainer = row.querySelector('td:first-child .badge')
+          if (badgeContainer) {
+            badgeContainer.textContent = `#${index + 1}`
+          }
+        })
+
+        currentPage = 1
+        showPage(1)
+      })
+    }
+
+    // Funcionalidad de ordenamiento
+    const sortButton = document.getElementById('sortButton')
+    if (sortButton && allRows.length > 0) {
+      // Comenzar en estado ascendente (ya que las fechas ya están ordenadas así)
+      let isAscending = true
+
+      sortButton.addEventListener('click', function() {
+        // Invertir el orden
+        isAscending = !isAscending
+        
+        filteredRows.sort((a, b) => {
+          const fechaA = a.querySelector('td:nth-child(3)')?.textContent || ''
+          const fechaB = b.querySelector('td:nth-child(3)')?.textContent || ''
+
+          const dateA = new Date(fechaA.split('/').reverse().join('-'))
+          const dateB = new Date(fechaB.split('/').reverse().join('-'))
+
+          return isAscending ? dateA - dateB : dateB - dateA
+        })
+
+        this.innerHTML = isAscending
+          ? '<i class="ri-sort-asc"></i> Ordenar por Fecha ↑'
+          : '<i class="ri-sort-desc"></i> Ordenar por Fecha ↓'
+
+        // Renumerar después de ordenar
+        filteredRows.forEach((row, index) => {
+          const badgeContainer = row.querySelector('td:first-child .badge')
+          if (badgeContainer) {
+            badgeContainer.textContent = `#${index + 1}`
+          }
+        })
+
+        showPage(currentPage)
+      })
+    }
+  </script>
+</AdminLayout>

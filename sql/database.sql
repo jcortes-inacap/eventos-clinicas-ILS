@@ -51,6 +51,7 @@ CREATE TABLE evento(
     qr_url VARCHAR(255),
     requiere_estacionamiento BOOLEAN NOT NULL DEFAULT FALSE,
     duracion INTEGER,
+    estado INTEGER NOT NULL DEFAULT 1,
     id_lugar INTEGER REFERENCES lugar(id_lugar) ON UPDATE CASCADE,
     id_usuarios INTEGER REFERENCES usuarios(id_usuarios) ON UPDATE CASCADE
 );
@@ -207,3 +208,6 @@ SELECT * FROM roles;
 
 SELECT * FROM usuarios WHERE nombre = 'Penka';
 SELECT * FROM usuarios ORDER BY id_usuarios ASC;
+
+SELECT * FROM evento;
+SELECT * FROM fecha_evento;

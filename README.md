@@ -25,3 +25,10 @@ Scripts SQL para la creación y población inicial de la base de datos PostgreSQ
 2. Configura el backend (en la carpeta back-end -> composer install -> php artisan serve --port=3000 y npm install -> npm run dev)
 3. Configura el frontend (en la carpeta back-end -> npm install -> npm run dev)
 4. Ejecuta los scripts SQL en postgressql
+
+## IMPORTANTE
+
+1. Para las rutas api se usa el archivo front-end/src/services/api.js 
+2. El sidebar principal se encuentra en front-end/src/html/layouts/admin/partials/_sidebar/_nav-tree.astro
+3. Las "Paginas" van en la carpeta html/pages
+4. Los ejemplos siguiendo los puntos anteriores se encuentran en la carpeta users/assignment y eventos/

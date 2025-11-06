@@ -75,6 +75,32 @@ const isActiveParent = (path: string) => currentPath.startsWith(path)
       </ul>
     </li>
 
+    <!-- Eventos Section -->
+     <li class={`nav-item has-submenu parent ${isActiveParent('eventos') ? 'active open' : ''}`}>
+      <a class="nav-link" href="#">
+        <i class="ri-calendar-event-fill"></i>
+        <span>Eventos</span>
+        <i class="ri-arrow-right-s-line"></i>
+      </a>
+      <ul class="submenu">
+        <li class={`nav-item ${isActive('eventos/lugares-crud') ? 'active' : ''}`}>
+          <a class="nav-link" href={getPathPrefix('/eventos/lugares-crud')}>
+            <span>Lugares</span>
+          </a>
+        </li>
+        <li class={`nav-item ${isActive('eventos/eventos-crud') ? 'active' : ''}`}>
+          <a class="nav-link" href={getPathPrefix('/eventos/eventos-crud')}>
+            <span>Eventos</span>
+          </a>
+        </li>
+        <li class={`nav-item ${isActive('eventos/fechas-evento-crud') ? 'active' : ''}`}>
+          <a class="nav-link" href={getPathPrefix('/eventos/fechas-evento-crud')}>
+            <span>Fechas de Eventos</span>
+          </a>
+        </li>
+      </ul>
+    </li>
+
     <!-- Role & Permissions Section -->
     <li
       class={`nav-item has-submenu parent ${isActiveParent('roles-permissions') ? 'active open' : ''}`}
