@@ -168,53 +168,44 @@ INSERT INTO areas (descripcion, estado) VALUES
 ('Gastronomia', 1),
 ('Salud', 1),
 ('Turismo y Hospitalidad', 1),
-('Agroindustria y medioambiente', 1);
-('Construcción', 1);
-('Energías Renovables y Eficiencia Energética', 1);
-('Logística', 1);
-('Mecánica', 1);
-('Minería', 1);
-('Automatización y Robótica', 1);
-('Diseño e Industria Digital', 1);
-('Electricidad, Electrónica y Telecomunicaciones', 1);
+('Agroindustria y medioambiente', 1),
+('Construcción', 1),
+('Energías Renovables y Eficiencia Energética', 1),
+('Logística', 1),
+('Mecánica', 1),
+('Minería', 1),
+('Automatización y Robótica', 1),
+('Diseño e Industria Digital', 1),
+('Electricidad, Electrónica y Telecomunicaciones', 1),
 ('Tecnologías de Información y Ciberseguridad', 1);
 
 -- Insertar carreras de INACAP sede La Serena
 INSERT INTO carreras (descripcion, estado, id_area)
-VALUES ('Ingenieria Informatica', 1,
-        SELECT id_area FROM areas WHERE descripcion = 'Tecnologías de Información y Ciberseguridad');
+VALUES ('Ingenieria Informatica', 1, (SELECT id_area FROM areas WHERE descripcion = 'Tecnologías de Información y Ciberseguridad' LIMIT 1));
 
 INSERT INTO carreras (descripcion, estado, id_area)
-VALUES ('Ingenieria Civil Industrial', 0,
-        SELECT id_area FROM areas WHERE descripcion = 'Administracion');
+VALUES ('Ingenieria Civil Industrial', 0, (SELECT id_area FROM areas WHERE descripcion = 'Administracion' LIMIT 1));
 
 INSERT INTO carreras (descripcion, estado, id_area)
-VALUES ('Ingenieria en Maquinaria y Vehiculos Pesados', 1, 
-        SELECT id_area FROM areas WHERE descripcion = 'Mecánica');
+VALUES ('Ingenieria en Maquinaria y Vehiculos Pesados', 1, (SELECT id_area FROM areas WHERE descripcion = 'Mecánica' LIMIT 1));
 
 INSERT INTO carreras (descripcion, estado, id_area)
-VALUES ('Ingenieria en Conectividad y Redes', 1, 
-        SELECT id_area FROM areas WHERE descripcion = 'Tecnologías de Información y Ciberseguridad');
+VALUES ('Ingenieria en Conectividad y Redes', 1, (SELECT id_area FROM areas WHERE descripcion = 'Tecnologías de Información y Ciberseguridad' LIMIT 1));
 
 INSERT INTO carreras (descripcion, estado, id_area)
-VALUES ('Analista Programador', 1, 
-        SELECT id_area FROM areas WHERE descripcion = 'Tecnologías de Información y Ciberseguridad');
+VALUES ('Analista Programador', 1, (SELECT id_area FROM areas WHERE descripcion = 'Tecnologías de Información y Ciberseguridad' LIMIT 1));
 
 INSERT INTO carreras (descripcion, estado, id_area)
-VALUES ('Administracion de Empresas', 1, 
-        SELECT id_area FROM areas WHERE descripcion = 'Administracion');
+VALUES ('Administracion de Empresas', 1, (SELECT id_area FROM areas WHERE descripcion = 'Administracion' LIMIT 1));
 
 INSERT INTO carreras (descripcion, estado, id_area)
-VALUES ('Contabilidad General', 1, 
-        SELECT id_area FROM areas WHERE descripcion = 'Administracion');
+VALUES ('Contabilidad General', 1, (SELECT id_area FROM areas WHERE descripcion = 'Administracion' LIMIT 1));
 
 INSERT INTO carreras (descripcion, estado, id_area)
-VALUES('Construccion Civil', 1, 
-       SELECT id_area FROM areas WHERE descripcion = 'Construcción');
+VALUES ('Construccion Civil', 1, (SELECT id_area FROM areas WHERE descripcion = 'Construcción' LIMIT 1));
 
 INSERT INTO carreras (descripcion, estado, id_area)
-VALUES ('Ingenieria Civil Informatica', 0, 
-        SELECT id_area FROM areas WHERE descripcion = 'Tecnologías de Información y Ciberseguridad');
+VALUES ('Ingenieria Civil Informatica', 0, (SELECT id_area FROM areas WHERE descripcion = 'Tecnologías de Información y Ciberseguridad' LIMIT 1));
 
 -- Asignar usuarios como director de carrera
 INSERT INTO usuarios (nombre, apellidos, usuario, clave, id_roles, id_carrera)
@@ -257,3 +248,5 @@ SELECT * FROM roles;
 
 SELECT * FROM usuarios WHERE nombre = 'Penka';
 SELECT * FROM usuarios ORDER BY id_usuarios ASC;
+
+SELECT * FROM areas;
