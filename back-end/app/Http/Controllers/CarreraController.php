@@ -43,15 +43,17 @@ class CarreraController extends Controller
     //Store
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'descripcion' => 'required|string|max:150',
-            'estado' => 'required|integer|in:0,1',
+        $validated = $request->validate([
+            'descripcion' => 'required|string|max:255',
             'id_area' => 'required|exists:areas,id_area',
+            'estado' => 'required|in:0,1',
         ]);
 
-        Carrera::create($data);
+        $carrera = Carrera::create($validated);
 
+        return response()->json(['id_carrera' => $carrera->id_carrera], 201);
     }
+
 
     //Mostrar
     public function show(Carrera $carrera)
@@ -98,10 +100,24 @@ class CarreraController extends Controller
 
 
     public function destroy(Carrera $carrera)
-{
-    $carrera->update(['estado' => 0]);
-    return response()->json(['mensaje' => 'Carrera desactivada']);
-}
+    {
+        $carrera->update(['estado' => 0]);
+        return response()->json(['mensaje' => 'Carrera desactivada']);
+    }
+
+    public function toggle($id)
+    {
+        $carrera = Carrera::findOrFail($id);
+        $carrera->estado = $carrera->estado === 1 ? 0 : 1;
+        $carrera->save();
+
+        return response()->json([
+            'id' => $carrera->id_carrera,
+            'estado' => $carrera->estado,
+            'mensaje' => $carrera->estado === 1 ? 'Carrera activada' : 'Carrera desactivada'
+        ]);
+    }
+
 
 
 }

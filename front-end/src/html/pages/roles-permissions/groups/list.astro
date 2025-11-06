@@ -1,27 +1,25 @@
 ---
+// Imports
 import { getAssetPrefix, getPathPrefix } from '../../../../utils/path.js'
 import AdminLayout from '../../../layouts/admin/admin-layout.astro'
 import type { Props as PageHeaderProps } from '../../../components/common/page-header.astro'
 import PageHeader from '../../../components/common/page-header.astro'
 import ConfirmationModal from '../../../components/common/confirmation-modal.astro'
 
-// Register DataTables styles
+// DataTables styles
 const pageStyles = `
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.7/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/datatables.net-responsive-bs5@2.5.0/css/responsive.bootstrap5.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/datatables.net-responsive-bs5@2.5.0/css/responsive.bootstrap5.min.css">
 `
 
-// Register DataTables scripts
-const pageScript = `<!-- Add this scripts before body close -->
-<!-- Jquery -->
+// DataTables scripts
+const pageScript = `
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
-
-<!-- DataTables JS -->
 <script src="https://cdn.jsdelivr.net/npm/datatables.net@1.13.7/js/jquery.dataTables.min.js"></script>
-
 <script src="${getAssetPrefix('/assets/vendor/datatables/datatables.init.js')}"></script>
 <script type="module" src="${getAssetPrefix('/assets/js/pages/roles-permissions/groups/table.js')}"></script>
 `
+
 interface Carrera {
   id_carrera: number
   descripcion: string
@@ -32,44 +30,57 @@ interface Carrera {
   }
 }
 
-
 interface Area {
-  id_area: number;
-  descripcion: string;
-  estado: number;
+  id_area: number
+  descripcion: string
+  estado: number
 }
 
-let areas: Area[] = [];
+// Leer filtros desde la URL
+const url = new URL(Astro.request.url)
+const estadoSeleccionado = url.searchParams.getAll('estado[]')
+const idAreaSeleccionada = url.searchParams.get('id_area')
 
+// Fetch de áreas
+let areas: Area[] = []
 try {
-  const res = await fetch('http://localhost:3000/api/areas');
-  const json = await res.json();
-  areas = json.data || [];
+  const res = await fetch('http://localhost:3000/api/areas')
+  const json = await res.json()
+  areas = json.data || []
 } catch (error) {
-  console.error('Error al obtener áreas:', error);
+  console.error('Error al obtener áreas:', error)
 }
 
-let carreras: Carrera[]=[];
+// Construir query con filtros
+let query = 'http://localhost:3000/api/carreras?'
+if (estadoSeleccionado.length > 0) {
+  estadoSeleccionado.forEach(e => query += `estado[]=${e}&`)
+}
+if (idAreaSeleccionada) {
+  query += `id_area=${idAreaSeleccionada}`
+}
 
+// Fetch de carreras filtradas
+let carreras: Carrera[] = []
 try {
-  const res = await fetch('http://localhost:3000/api/carreras?estado=1');
-  const json = await res.json();
-  carreras = json.data || [];
+  const res = await fetch(query)
+  const json = await res.json()
+  carreras = json.data || []
 } catch (error) {
-  console.error('Error al obtener carreras:', error);
+  console.error('Error al obtener carreras:', error)
 }
 
-//Page Header
+// Props para el encabezado
 const pageHeaderProps: PageHeaderProps = {
   title: 'Carreras',
   breadcrumbs: [
-    { label: 'Dashboard', href: getPathPrefix('/dashboard'), class: '' },
-    { label: 'Roles y Carreras', href: getPathPrefix('/roles-permissions'), class: '' },
+    { label: 'Dashboard', href: getPathPrefix('/dashboard') },
+    { label: 'Roles y Carreras', href: getPathPrefix('/roles-permissions') },
     { label: 'Carreras', class: 'active' }
   ],
   actions: [
     {
-      label: 'Agregar Carreras',
+      label: 'Agregar Carrera',
       href: getPathPrefix('/roles-permissions/groups/add'),
       type: 'link',
       variant: 'btn-primary',
@@ -78,6 +89,7 @@ const pageHeaderProps: PageHeaderProps = {
   ]
 }
 ---
+
 
 <AdminLayout
   title="Carreras Inacap"
@@ -88,14 +100,13 @@ const pageHeaderProps: PageHeaderProps = {
 >
   <PageHeader {...pageHeaderProps} />
 
-  <!-- Groups Table -->
   <div class="row">
     <div class="col-12">
       <div class="card">
         <div class="card-body">
           <div class="astero-table">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
-              <!--begin::Search-->
+              <!-- Buscador principal -->
               <div class="search-wrapper">
                 <i class="ri-search-line search-icon"></i>
                 <input
@@ -108,110 +119,98 @@ const pageHeaderProps: PageHeaderProps = {
                   <i class="ri-close-line"></i>
                 </button>
               </div>
-              <!--end::Search-->
-              <!-- Botón para abrir filtros -->
+
+              <!-- Botón filtros -->
               <button class="btn btn-outline-primary" data-bs-toggle="offcanvas" data-bs-target="#filterDrawer">
                 <i class="ri-filter-2-line"></i> Filtros
               </button>
-
-              <!-- Drawer de filtros -->
-              <div class="offcanvas offcanvas-end" tabindex="-1" id="filterDrawer">
-                <div class="offcanvas-header border-bottom">
-                  <h5 class="offcanvas-title">Opciones de Filtro</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
-                </div>
-                <div class="offcanvas-body">
-                  <form id="form-filtros" class="d-flex flex-column gap-3">
-                    <!-- Estado -->
-                    <div>
-                      <label class="form-label fw-medium">Estado</label>
-                      <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="estado" value="1" id="estado-activo" checked />
-                        <label class="form-check-label" for="estado-activo">Activa</label>
-                      </div>
-                      <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="estado" value="0" id="estado-inactivo" />
-                        <label class="form-check-label" for="estado-inactivo">Inactiva</label>
-                      </div>
-                    </div>
-
-                    <!-- Área -->
-                    <div>
-                      <label class="form-label fw-medium">Área</label>
-                      <select class="form-select" name="id_area" id="id_area">
-                        <option value="">Todas</option>
-                        <!-- Opciones dinámicas -->
-                        {areas.map(area => (
-                          <option value={area.id_area}>{area.descripcion}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <!-- Acciones -->
-                    <div class="d-flex gap-2 mt-3">
-                      <button type="submit" class="btn btn-primary flex-grow-1">Aplicar filtros</button>
-                      <button type="button" class="btn btn-light" id="reset-filtros">Reiniciar</button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-
-                <!--begin::Bulk Actions-->
-                <div class="bulk-actions-div d-none" data-table-toolbar="bulk_selected">
-                  <span class="selected-count me-2"
-                    ><span data-table-select="selected_count"></span> items selected</span
-                  >
-                  <button
-                    class="btn btn-light-danger shadow-none align-items-center gap-2 bulk-delete"
-                    data-table-select="delete_selected"
-                  >
-                    <i class="ri-delete-bin-line"></i> Delete Selected
-                  </button>
-                </div>
-                <!--end::Bulk Actions-->
-              </div>
-              <!--end::Table toolbar-->
             </div>
-            <div class="table-container">
-              <div
-                class="d-none flex-column flex-lg-row justify-content-start filter-datas mb-3"
-                data-filters
-              >
-                <strong class="fs-6 me-2 text-primary">Filters : </strong>
-                <div class="d-flex flex-row flex-wrap align-items-center" data-filters-data></div>
+
+            <!-- Drawer de filtros -->
+            <div class="offcanvas offcanvas-end" tabindex="-1" id="filterDrawer">
+              <div class="offcanvas-header border-bottom">
+                <h5 class="offcanvas-title">Opciones de Filtro</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
               </div>
 
+              <div class="offcanvas-body">
+                <form method="GET" action="/roles-permissions/groups/list" id="form-filtros" class="d-flex flex-column gap-3">
+                  <!-- Estado -->
+                  <div>
+                    <label class="form-label fw-medium">Estado</label>
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        name="estado[]"
+                        value="1"
+                        id="estado-activo"
+                        checked={estadoSeleccionado.includes('1')}
+                      />
+                      <label class="form-check-label" for="estado-activo">Activa</label>
+                    </div>
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        name="estado[]"
+                        value="0"
+                        id="estado-inactivo"
+                        checked={estadoSeleccionado.includes('0')}
+                      />
+                      <label class="form-check-label" for="estado-inactivo">Inactiva</label>
+                    </div>
+                  </div>
+
+                  <!-- Área -->
+                  <div>
+                    <label class="form-label fw-medium">Área</label>
+                    <select class="form-select" name="id_area" id="id_area">
+                      <option value="">Todas</option>
+                      {areas.map(area => (
+                        <option
+                          value={area.id_area}
+                          selected={idAreaSeleccionada == String(area.id_area)}
+                        >
+                          {area.descripcion}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <!-- Acciones -->
+                  <div class="d-flex gap-2 mt-3">
+                    <button type="submit" class="btn btn-primary flex-grow-1">Aplicar filtros</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <!-- Tabla -->
+            <div class="table-container">
               <div class="table-responsive border-0">
                 <table id="table_carreras" class="table align-middle">
                   <thead>
                     <tr>
-                      <th class="fs-6">
-                        <div class="form-check">
-                          <input class="form-check-input" type="checkbox" data-table-select="select_all" />
-                        </div>
+                      <th class="text-center align-middle" style="width: 40px;">
+                        <input class="form-check-input m-0" type="checkbox" data-table-select="select_all" />
                       </th>
-                      <th>CARRERA</th>
+                      <th>DESCRIPCIÓN</th>
                       <th>ÁREA</th>
                       <th>ESTADO</th>
-                      <th class="text-end pe-3">ACCIONES</th>
+                      <th class="text-end pe-3">Acción</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {
-                      carreras.map((carrera) => (
+                    {carreras.map(carrera => (
+                      carrera && typeof carrera.id_carrera === 'number' ? (
                         <tr>
-                          <td />
-                          <td>
-                            <span class="text-primary">{carrera.descripcion}</span>
+                          <td class="text-center align-middle" style="width: 40px;">
+                            <input class="form-check-input m-0" type="checkbox" data-row-id={carrera.id_carrera} />
                           </td>
-                          <td>
-                            <span class="text-muted">{carrera.area?.descripcion ?? '-'}</span>
-                          </td>
-                          <td>
-                            <span class="badge ${carrera.estado === 1 ? 'bg-success' : 'bg-warning'}">
-                              ${carrera.estado === 1 ? 'Activa' : 'Inactiva'}
-                            </span>
-                          </td>
+                          <td>{carrera.descripcion}</td>
+                          <td>{carrera.area?.descripcion ?? '-'}</td>
+                          <td>{carrera.estado === 1 ? 'Activo' : 'Inactivo'}</td>
                           <td class="text-end">
                             <div class="dropdown text-end">
                               <button
@@ -220,32 +219,43 @@ const pageHeaderProps: PageHeaderProps = {
                                 data-bs-toggle="dropdown"
                                 aria-expanded="false"
                               >
-                                Acciones
+                                Acción
                               </button>
                               <ul class="dropdown-menu">
                                 <li>
                                   <a
-                                    class="dropdown-item d-flex align-items-center gap-2"
-                                    href={getPathPrefix(`/roles-permissions/carreras/edit/${carrera.id_carrera}`)}
+                                    href={`/roles-permissions/groups/add?id=${carrera.id_carrera}`}
+                                    class="dropdown-item text-primary"
                                   >
-                                    <i class="ri-pencil-line" /> Editar
+                                    Editar
                                   </a>
                                 </li>
                                 <li><hr class="dropdown-divider" /></li>
                                 <li>
                                   <a
-                                    class="dropdown-item d-flex align-items-center gap-2 text-danger delete-button"
+                                    class={`dropdown-item ${carrera.estado === 1 ? 'text-danger' : 'text-success'}`}
                                     href="#"
+                                    onclick={`if (confirm('¿Estás seguro de que deseas ${carrera.estado === 1 ? 'desactivar' : 'activar'} esta carrera?')) {
+                                      fetch('http://localhost:3000/api/carreras/${carrera.id_carrera}/toggle', {
+                                        method: 'POST',
+                                        headers: { 'Accept': 'application/json' }
+                                      })
+                                      .then(res => res.json())
+                                      .then(data => {
+                                        alert('Carrera actualizada: estado = ' + (data.estado === 1 ? 'Activo' : 'Inactivo'));
+                                        location.reload();
+                                      });
+                                    } return false;`}
                                   >
-                                    <i class="ri-delete-bin-line" /> Eliminar
+                                    {carrera.estado === 1 ? 'Desactivar' : 'Activar'}
                                   </a>
                                 </li>
                               </ul>
                             </div>
                           </td>
                         </tr>
-                      ))
-                    }
+                      ) : null
+                    ))}
                   </tbody>
                 </table>
               </div>

@@ -9,7 +9,7 @@ var GroupsDatatable = (function () {
   var initDatatable = function () {
     dt = $("#table_carreras").DataTable({
       searchDelay: 500,
-      processing: true,
+      processing: false,
       order: [1, "asc"],
       lengthMenu: [5, 10, 50, 100],
       iDisplayLength: 5,
@@ -24,61 +24,18 @@ var GroupsDatatable = (function () {
           orderable: false,
           searchable: false,
           className: "select-checkbox",
-          render: function (data) {
-            return `<div class="form-check">
-                            <input class="form-check-input bulk-select" type="checkbox" value="${data}">
-                        </div>`;
-          },
         },
         {
           targets: 1,
-          render: function (data) {
-            return `<div class="d-flex align-items-center">
-                            <div>
-                                <h6 class="mb-0">${data}</h6>
-                            </div>
-                        </div>`;
           },
-        },
         {
           targets: 2,
-          render: function (data) {
-            return `<span class="text-muted">${data}</span>`;
-          },
         },
         {
           targets: 3,
-          render: function (data) {
-            const statusClasses = {
-              Active: "success",
-              Inactive: "warning",
-              Trashed: "danger",
-            };
-            return `<span class="badge bg-${statusClasses[data]}">${data}</span>`;
-          },
         },
         {
           targets: -1,
-          data: null,
-          orderable: false,
-          className: "text-end",
-          render: function () {
-            return (
-              `
-                  <div class="dropdown text-end">
-                      <button class="btn btn-light btn-active-light-primary dropdown-toggle shadow-none action-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                          Accciones
-                      </button>
-                      <ul class="dropdown-menu">
-                        <li><a class="dropdown-item d-flex align-items-center gap-2" href="` +
-              getPathPrefix("/roles-permissions/groups/edit") +
-              `"><i class="ri-pencil-line"></i> Edit</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item d-flex align-items-center gap-2 text-danger delete-button" href="#"><i class="ri-delete-bin-line"></i> Delete</a></li>
-                      </ul>
-                  </div>`
-            );
-          },
         },
       ],
     });
@@ -133,32 +90,79 @@ var GroupsDatatable = (function () {
     });
   };
 
-  // Handle filter data
-  var handleFilterDataRows = () => {
-    // Get all filter values
-    let statusFilters = [];
-    // get active status from navigation data-type="navbar"
-    $('[data-type="navbar"]').each(function () {
-      if ($(this).hasClass("active")) {
-        if ($(this).attr("data-value") != "all") {
-          statusFilters.push($(this).attr("data-value"));
-        }
-      }
-    });
+var handleFilterData = () => {
+  const filterDataView = document.querySelector("[data-filters]");
+  const filterData = document.querySelector("[data-filters-data]");
+  let search_html = "";
+
+  // Búsqueda
+  const searchval = $('[data-table-filter="search"]').val();
+  if (searchval) {
+    search_html += `
+      <span class="badge text-bg-primary d-flex justify-content-between fs-7 me-2 fw-bold align-items-center">
+        Búsqueda: ${searchval}
+        <span class="ri-close-line cursor-pointer fs-7 fw-bold ms-2 text-inverse clear-filter"
+              data-type="input" data-filter="search"></span>
+      </span>`;
+  }
+
+  // Estado
+  $('input[name="estado"]:checked').each(function () {
+    const val = $(this).val();
+    const label = $(this).next("label").text().trim();
+    search_html += `
+      <span class="badge text-bg-primary d-flex justify-content-between fs-7 me-2 fw-bold align-items-center">
+        Estado: ${label}
+        <span class="ri-close-line cursor-pointer fs-7 fw-bold ms-2 text-inverse clear-filter"
+              data-val="${val}" data-type="checkbox" data-filter="estado"></span>
+      </span>`;
+  });
+
+  // Área
+  const areaVal = $('#id_area').val();
+  if (areaVal) {
+    const areaLabel = $('#id_area option:selected').text().trim();
+    search_html += `
+      <span class="badge text-bg-primary d-flex justify-content-between fs-7 me-2 fw-bold align-items-center">
+        Área: ${areaLabel}
+        <span class="ri-close-line cursor-pointer fs-7 fw-bold ms-2 text-inverse clear-filter"
+              data-val="${areaVal}" data-type="select" data-filter="id_area"></span>
+      </span>`;
+  }
+
+  // Mostrar o limpiar
+  if (search_html !== "") {
+    const clearAllButton = document.createElement("span");
+    clearAllButton.className =
+      "badge text-bg-danger fs-7 me-2 d-flex align-items-center fw-semibold cursor-pointer clear-filter";
+    clearAllButton.setAttribute("data-filter", "all");
+    clearAllButton.textContent = "Limpiar todo";
+
+    filterData.innerHTML = search_html;
+    filterData.appendChild(clearAllButton);
+
+    filterDataView.classList.remove("d-none");
+    filterDataView.classList.add("d-flex");
+
+    clearFilters();
+  } else {
+    filterDataView.classList.remove("d-flex");
+    filterDataView.classList.add("d-none");
+  }
+
 
     // Get checked status from filter drawer
-    $('input[name="status"]:checked').each(function () {
+    $('input[name="estado"]:checked').each(function () {
       statusFilters.push($(this).val());
     });
 
+
     // Add custom filtering
     $.fn.dataTable.ext.search.push(function (_settings, data) {
-      let rowStatus = data[3].toLowerCase(); // Status column
-
-      // Status filter
+      let rowStatus = data[3].toLowerCase(); // columna ESTADO
       let statusMatch =
         statusFilters.length === 0 ||
-        statusFilters.some((status) => rowStatus.includes(status));
+        statusFilters.some((status) => rowStatus.includes(status === "1" ? "activo" : "inactivo"));
 
       return statusMatch;
     });
@@ -268,48 +272,56 @@ var GroupsDatatable = (function () {
 
   // Clear filters
   var clearFilters = function () {
-    if ($(".clear-filter").length > 0) {
-      $(".clear-filter").on("click", function () {
-        var filter = $(this).attr("data-filter");
-        var type = $(this).attr("data-type");
+  if ($(".clear-filter").length > 0) {
+    $(".clear-filter").on("click", function () {
+      const filter = $(this).attr("data-filter");
+      const type = $(this).attr("data-type");
+      const val = $(this).attr("data-val");
 
-        if (filter == "all") {
-          $('[data-table-filter="search"]').val("");
-          $("[data-table-filter]").each(function () {
-            var elementType = $(this).attr("data-type");
-            if (elementType == "checkbox") {
+      if (filter === "all") {
+        // Limpiar búsqueda
+        $('[data-table-filter="search"]').val("");
+        $(".search-clear").hide();
+
+        // Limpiar checkboxes de estado
+        $('input[name="estado"]').prop("checked", false);
+
+        // Limpiar select de área
+        $('#id_area').val("");
+      } else {
+        if (type === "checkbox" && filter === "estado") {
+          $('input[name="estado"]:checked').each(function () {
+            if ($(this).val() === val) {
               $(this).prop("checked", false);
             }
           });
-
-          $(".search-clear").hide();
-        } else {
-          if (type == "checkbox") {
-            var val = $(this).attr("data-val");
-            var checkboxFilter = $(
-              '[data-table-filter="' + filter + '"]:checked',
-            );
-            checkboxFilter.each(function () {
-              if ($(this).val() == val) {
-                $(this).prop("checked", false);
-              }
-            });
-          } else {
-            var otherFilter = $('[data-table-filter="' + filter + '"]');
-            otherFilter.val("");
-          }
         }
 
-        $(".dataTables_wrapper").addClass("processing");
-        $(".dataTables_processing").css("display", "block");
-        $.fn.dataTable.ext.search = [];
-        setTimeout(function () {
-          handleFilterDataRows();
-          dt.draw();
-        }, 500);
-      });
-    }
-  };
+        if (filter === "search") {
+          $('[data-table-filter="search"]').val("");
+          $(".search-clear").hide();
+        }
+
+        if (filter === "id_area") {
+          $('#id_area').val("");
+        }
+      }
+
+      $(".dataTables_wrapper").addClass("processing");
+      $(".dataTables_processing").css("display", "block");
+
+      $.fn.dataTable.ext.search = [];
+
+      setTimeout(function () {
+        handleFilterDataRows();
+        dt.draw();
+        $(".dataTables_wrapper").removeClass("processing");
+        $(".dataTables_processing").css("display", "none");
+      }, 500);
+    });
+  }
+};
+
 
   // Init toggle toolbar
   var initToggleToolbar = function () {

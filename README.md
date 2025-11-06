@@ -24,3 +24,13 @@ Scripts SQL para la creación y población inicial de la base de datos PostgreSQ
 2. Configura el backend (en la carpeta back-end -> composer install -> php artisan serve --port=3000 y npm install -> npm run dev)
 3. Configura el frontend (en la carpeta back-end -> npm install -> npm run dev)
 4. Ejecuta los scripts SQL en postgressql
+
+
+
+## Detalles módulo-areas/carreras
+
+1. Conflicto con CORS, tuve que añadir la ruta del proyectp.
+2. Conflicto con Token de Middleware, deshabilité el uso de CSRF Token desde el Verify añadiendo las rutas que se usaban con api/* como base
+3. Pendiente detalles de nombres y rutas con nuevos nombres y seguros
+4. Pendiente posibles usos de checkboxs para múltiples areas/carreras al mismo tiempo
+5. Switch alerts decentes

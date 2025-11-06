@@ -77,4 +77,5 @@ Route::prefix('catalogos')->group(function() {
 Route::apiResource('areas', AreaController::class);
 Route::apiResource('carreras', CarreraController::class);
 Route::post('/areas/{id}/toggle', [AreaController::class, 'toggleEstadoPorId']);
+Route::post('/carreras/{id}/toggle', [CarreraController::class, 'toggle']);
 Route::put('/api/areas/{id}', [AreaController::class, 'update']);

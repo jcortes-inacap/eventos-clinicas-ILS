@@ -20,6 +20,7 @@ class Carrera extends Model
         // 'id_carrera',
         'descripcion',
         'estado',
+        'id_area'
     ];
 
     public function usuarios() // Relación con el modelo Usuario, una carrera tiene muchos usuarios, se usa hasMany con dos claves foráneas para definir la relación
