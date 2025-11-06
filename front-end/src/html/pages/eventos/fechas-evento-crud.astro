@@ -21,7 +21,6 @@ const fechasEventoPageConfig: PageHeaderProps = {
   title: 'Gestión de Fechas de Eventos',
   breadcrumbs: [
     { label: 'Dashboard', href: getPathPrefix('/dashboard'), class: '' },
-    { label: 'Other Pages', class: '' },
     { label: 'Fechas de Eventos CRUD', class: 'active' }
   ]
 }
@@ -84,7 +83,7 @@ const fechasEventoPageConfig: PageHeaderProps = {
                     <th>Evento</th>
                     <th>Fecha</th>
                     <th>Estado</th>
-                    <th class="text-end">Acciones</th>
+                    <th class="text-center">Acciones</th>
                   </tr>
                 </thead>
                 <tbody id="fechasEventoTableBody">
@@ -171,7 +170,7 @@ const fechasEventoPageConfig: PageHeaderProps = {
                             </span>
                           )}
                         </td>
-                        <td class="text-end">
+                        <td class="text-center">
                             <button 
                               class="btn btn-sm btn-light me-2 edit-fecha" 
                               data-fecha-id={fechaEvento.id_fecha}

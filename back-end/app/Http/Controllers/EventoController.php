@@ -144,4 +144,19 @@ class EventoController extends Controller
             'data' => $eventos
         ]);
     }
+    /**
+     * GENERAR CÓDIGO QR PARA UN EVENTO
+     * GET /api/eventos/{evento}/qr
+     */
+    public function generarQR(Evento $evento): JsonResponse
+    {
+        $qrPath = $this->eventoService->generarQR($evento);
+
+        return response()->json([
+            'success' => true,
+            'qr_url' => asset($qrPath)
+        ]);
+    }
 }
+
+

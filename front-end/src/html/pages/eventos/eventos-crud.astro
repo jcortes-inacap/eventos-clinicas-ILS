@@ -21,7 +21,6 @@ const eventosPageConfig: PageHeaderProps = {
   title: 'Gestión de Eventos',
   breadcrumbs: [
     { label: 'Dashboard', href: getPathPrefix('/dashboard'), class: '' },
-    { label: 'Other Pages', class: '' },
     { label: 'Eventos CRUD', class: 'active' }
   ]
 }
@@ -85,7 +84,7 @@ const eventosPageConfig: PageHeaderProps = {
                     <th>Visibilidad</th>
                     <th>Modalidad</th>
                     <th>Duración</th>
-                    <th class="text-end">Acciones</th>
+                    <th class="text-center">Acciones</th>
                   </tr>
                 </thead>
                 <tbody id="eventosTableBody">
@@ -119,7 +118,7 @@ const eventosPageConfig: PageHeaderProps = {
                         </span>
                       </td>
                       <td>{evento.duracion ? evento.duracion + ' min' : 'N/A'}</td>
-                      <td class="text-end">
+                      <td class="text-center">
                           <button 
                             class="btn btn-sm btn-light me-2 edit-evento" 
                             data-evento-id={evento.id_evento}
@@ -128,12 +127,16 @@ const eventosPageConfig: PageHeaderProps = {
                             <i class="ri-edit-line"></i>
                           </button>
                           <button 
-                            class="btn btn-sm btn-danger delete-evento" 
+                            class="btn btn-sm btn-danger me-2 delete-evento" 
                             data-evento-id={evento.id_evento}
                             data-evento-titulo={evento.titulo}
                             title="Eliminar"
                           >
                             <i class="ri-delete-bin-line"></i>
+                          </button>
+
+                          <button class="btn btn-sm btn-info ver-qr" data-evento-id={evento.id_evento}>
+                            <i class="ri-qr-code-line"></i>
                           </button>
                       </td>
                     </tr>
@@ -195,11 +198,6 @@ const eventosPageConfig: PageHeaderProps = {
                   <option value="online">Online</option>
                   <option value="hibrida">Híbrida</option>
                 </select>
-              </div>
-              <div class="col-12">
-                <label for="add_qr_url" class="form-label">Código QR</label>
-                <input type="text" class="form-control" id="add_qr_url" name="qr_url" placeholder="URL del código QR">
-                <small class="text-muted">Dejar vacío o ingresar URL del código QR del evento</small>
               </div>
               <div class="col-md-6">
                 <label for="add_duracion" class="form-label">Duración (minutos) <span class="text-danger">*</span></label>
@@ -515,11 +513,6 @@ const eventosPageConfig: PageHeaderProps = {
                 <option value="hibrida">Híbrida</option>
               </select>
             </div>
-            <div class="col-12">
-              <label for="edit_qr_url" class="form-label">Código QR</label>
-              <input type="text" class="form-control" id="edit_qr_url" name="qr_url" placeholder="URL del código QR">
-              <small class="text-muted">URL del código QR del evento</small>
-            </div>
             <div class="col-md-6">
               <label for="edit_duracion" class="form-label">Duración (minutos) <span class="text-danger">*</span></label>
               <input type="number" class="form-control" id="edit_duracion" name="duracion" min="1" required>
@@ -667,6 +660,24 @@ const eventosPageConfig: PageHeaderProps = {
     const addEventoForm = document.getElementById('addEventoForm')
     const addEventoModal = document.getElementById('addEventoModal')
     
+    // Variable para controlar si ya se agregó el listener
+    let modalidadListenerAdded = false
+    
+    // Resetear el formulario cuando se cierra el modal
+    if (addEventoModal) {
+      addEventoModal.addEventListener('hidden.bs.modal', function() {
+        if (addEventoForm) {
+          addEventoForm.reset()
+          // Resetear a valores por defecto
+          document.getElementById('add_visibilidad').value = 'publico'
+          document.getElementById('add_modalidad').value = 'presencial'
+          document.getElementById('add_requiere_estacionamiento').value = 'false'
+          // Mostrar el campo lugar (presencial por defecto)
+          toggleLugarField('presencial', 'add_lugar_container', 'add_id_lugar')
+        }
+      })
+    }
+    
     // Cargar directores y lugares cuando se abre el modal de agregar
     if (addEventoModal) {
       addEventoModal.addEventListener('show.bs.modal', async function() {
@@ -695,13 +706,15 @@ const eventosPageConfig: PageHeaderProps = {
         }
 
         // Configurar visibilidad inicial del campo lugar (presencial por defecto)
-        toggleLugarField('presencial', 'add_lugar_container', 'add_id_lugar')
+        const modalidadActual = modalidadSelect ? modalidadSelect.value : 'presencial'
+        toggleLugarField(modalidadActual, 'add_lugar_container', 'add_id_lugar')
 
-        // Evento para cambiar visibilidad del campo lugar según modalidad
-        if (modalidadSelect) {
+        // Evento para cambiar visibilidad del campo lugar según modalidad (solo una vez)
+        if (modalidadSelect && !modalidadListenerAdded) {
           modalidadSelect.addEventListener('change', function() {
             toggleLugarField(this.value, 'add_lugar_container', 'add_id_lugar')
           })
+          modalidadListenerAdded = true
         }
       })
     }
@@ -762,7 +775,6 @@ const eventosPageConfig: PageHeaderProps = {
           afiche_grafico: (formData.get('afiche_grafico') || '').trim(),
           visibilidad: formData.get('visibilidad'),
           modalidad,
-          qr_url: (formData.get('qr_url') || '').trim(),
           id_usuarios: parseInt(idUsuariosValue, 10),
           requiere_estacionamiento: formData.get('requiere_estacionamiento') === 'true',
           duracion: duracionNumber
@@ -829,7 +841,6 @@ const eventosPageConfig: PageHeaderProps = {
           document.getElementById('edit_afiche_grafico').value = evento.afiche_grafico || ''
           document.getElementById('edit_visibilidad').value = evento.visibilidad || 'publico'
           document.getElementById('edit_modalidad').value = evento.modalidad || 'presencial'
-          document.getElementById('edit_qr_url').value = evento.qr_url || ''
           document.getElementById('edit_duracion').value = evento.duracion || ''
           document.getElementById('edit_requiere_estacionamiento').value = evento.requiere_estacionamiento ? 'true' : 'false'
 
@@ -875,7 +886,6 @@ const eventosPageConfig: PageHeaderProps = {
         const aficheValue = document.getElementById('edit_afiche_grafico').value || ''
         const visibilidadValue = document.getElementById('edit_visibilidad').value
         const modalidadValue = document.getElementById('edit_modalidad').value
-        const qrValue = document.getElementById('edit_qr_url').value || ''
         const idUsuariosValue = document.getElementById('edit_id_usuarios').value
         const requiereEstacionamientoValue = document.getElementById('edit_requiere_estacionamiento').value === 'true'
 
@@ -900,7 +910,6 @@ const eventosPageConfig: PageHeaderProps = {
           afiche_grafico: aficheValue,
           visibilidad: visibilidadValue,
           modalidad: modalidadValue,
-          qr_url: qrValue,
           id_usuarios: parseInt(idUsuariosValue, 10),
           requiere_estacionamiento: requiereEstacionamientoValue,
           duracion: duracionNumber
@@ -1009,5 +1018,34 @@ const eventosPageConfig: PageHeaderProps = {
         showPage(currentPage)
       })
     }
+
+    // 📌 Ver código QR de evento
+    document.addEventListener('click', async function (e) {
+      if (e.target.closest('.ver-qr')) {
+        const idEvento = e.target.closest('.ver-qr').getAttribute('data-evento-id')
+
+        try {
+          // Llamar API para obtener (o generar) QR del backend
+          const response = await ApiService.request(`/eventos/${idEvento}/qr`)
+          const qrUrl = response.qr_url
+
+          // Mostrar en un SweetAlert2
+          Swal.fire({
+            title: `Código QR - Evento #${idEvento}`,
+            html: `<img src="${qrUrl}" alt="QR del evento" style="width:300px; height:300px; border-radius:8px;">`,
+            showCloseButton: true,
+            confirmButtonText: 'Cerrar',
+            width: 400
+          })
+        } catch (error) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No se pudo obtener el código QR del evento.'
+          })
+        }
+      }
+    })
+
   </script>
 </AdminLayout>

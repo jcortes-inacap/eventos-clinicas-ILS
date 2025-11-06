@@ -21,7 +21,6 @@ const lugaresPageConfig: PageHeaderProps = {
   title: 'Gestión de Lugares',
   breadcrumbs: [
     { label: 'Dashboard', href: getPathPrefix('/dashboard'), class: '' },
-    { label: 'Other Pages', class: '' },
     { label: 'Lugares CRUD', class: 'active' }
   ]
 }
@@ -83,8 +82,8 @@ const lugaresPageConfig: PageHeaderProps = {
                     <th>ID</th>
                     <th>Nombre</th>
                     <th>Dirección</th>
-                    <th>Tipo</th>
-                    <th class="text-end">Acciones</th>
+                    <th>Lugar</th>
+                    <th class="text-center">Acciones</th>
                   </tr>
                 </thead>
                 <tbody id="lugaresTableBody">
@@ -113,7 +112,7 @@ const lugaresPageConfig: PageHeaderProps = {
                           {lugar.tipo}
                         </span>
                       </td>
-                      <td class="text-end">
+                      <td class="text-center">
                           <button 
                             class="btn btn-sm btn-light me-2 edit-lugar" 
                             data-lugar-id={lugar.id_lugar}

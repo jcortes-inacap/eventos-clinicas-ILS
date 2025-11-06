@@ -74,6 +74,8 @@ Route::prefix('catalogos')->group(function() {
 // RUTAS DE EVENTOS (CRUD COMPLETO)
 // ============================================
 Route::prefix('eventos')->group(function() {
+    // ruta para codigo QR de un evento
+    Route::get('/{evento}/qr', [EventoController::class, 'generarQR']);
 
     // Rutas de filtrado (DEBEN IR ANTES de las rutas con parámetros)
     Route::get('/filtrar/visibilidad/{tipo}', [EventoController::class, 'filtrarPorVisibilidad']);
@@ -89,6 +91,10 @@ Route::prefix('eventos')->group(function() {
     Route::put('/{evento}', [EventoController::class, 'update']);           // Actualizar un evento (Route Model Binding)
     Route::patch('/{evento}', [EventoController::class, 'update']);         // Actualizar parcialmente un evento (Route Model Binding)
     Route::delete('/{evento}', [EventoController::class, 'destroy']);       // Eliminar un evento - soft delete (Route Model Binding)
+
+
+
+
 });
 
 // ============================================
