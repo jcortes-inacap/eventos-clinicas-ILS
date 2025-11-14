@@ -55,7 +55,7 @@ const eventosPageConfig: PageHeaderProps = {
                   class="form-control"
                   id="searchInput"
                   placeholder="Buscar por título o descripción..."
-                >
+                />
               </div>
             </div>
             <div class="col-md-4 text-end">
@@ -65,67 +65,72 @@ const eventosPageConfig: PageHeaderProps = {
             </div>
           </div>
 
-          {hasError ? (
-            <div class="alert alert-danger" role="alert">
-              <i class="ri-error-warning-line me-2"></i>
-              Error al cargar los eventos. Por favor, intente nuevamente.
-            </div>
-          ) : eventos.length === 0 ? (
-            <div class="alert alert-info" role="alert">
-              <i class="ri-information-line me-2"></i>
-              No hay eventos registrados en el sistema.
-            </div>
-          ) : (
-            <div class="table-responsive">
-              <table class="table table-hover align-middle">
-                <thead class="table">
-                  <tr>
-                    <th>Título</th>
-                    <th>Descripción</th>
-                    <th>Visibilidad</th>
-                    <th>Modalidad</th>
-                    <th>Duración</th>
-                    <th class="text-end">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody id="eventosTableBody">
-                  {eventos.map((evento, index) => (
+          {
+            hasError ? (
+              <div class="alert alert-danger" role="alert">
+                <i class="ri-error-warning-line me-2" />
+                Error al cargar los eventos. Por favor, intente nuevamente.
+              </div>
+            ) : eventos.length === 0 ? (
+              <div class="alert alert-info" role="alert">
+                <i class="ri-information-line me-2" />
+                No hay eventos registrados en el sistema.
+              </div>
+            ) : (
+              <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                  <thead class="table">
                     <tr>
-                      <td>
-                        <div class="d-flex align-items-center">
-                          <div>
-                            <div class="fw-medium">{evento.titulo}</div>
-                            <small class="text-muted">#{index + 1}</small>
+                      <th>Título</th>
+                      <th>Descripción</th>
+                      <th>Visibilidad</th>
+                      <th>Modalidad</th>
+                      <th>Duración</th>
+                      <th class="text-end">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody id="eventosTableBody">
+                    {eventos.map((evento, index) => (
+                      <tr>
+                        <td>
+                          <div class="d-flex align-items-center">
+                            <div>
+                              <div class="fw-medium">{evento.titulo}</div>
+                              <small class="text-muted">#{index + 1}</small>
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td>
-                        <small class="text-muted">
-                          {evento.descripcion ?
-                            (evento.descripcion.length > 50 ?
-                              evento.descripcion.substring(0, 50) + '...' :
-                              evento.descripcion)
-                            : 'Sin descripción'}
-                        </small>
-                      </td>
-                      <td>
-                        <span class={`badge bg-${evento.visibilidad === 'publico' ? 'success' : evento.visibilidad === 'privado' ? 'danger' : 'warning'}`}>
-                          {evento.visibilidad?.toUpperCase()}
-                        </span>
-                      </td>
-                      <td>
-                        <span class={`badge bg-${evento.modalidad === 'presencial' ? 'info' : evento.modalidad === 'online' ? 'primary' : 'secondary'}`}>
-                          {evento.modalidad?.toUpperCase()}
-                        </span>
-                      </td>
-                      <td>{evento.duracion ? evento.duracion + ' min' : 'N/A'}</td>
-                      <td class="text-end">
+                        </td>
+                        <td>
+                          <small class="text-muted">
+                            {evento.descripcion
+                              ? evento.descripcion.length > 50
+                                ? evento.descripcion.substring(0, 50) + '...'
+                                : evento.descripcion
+                              : 'Sin descripción'}
+                          </small>
+                        </td>
+                        <td>
+                          <span
+                            class={`badge bg-${evento.visibilidad === 'publico' ? 'success' : evento.visibilidad === 'privado' ? 'danger' : 'warning'}`}
+                          >
+                            {evento.visibilidad?.toUpperCase()}
+                          </span>
+                        </td>
+                        <td>
+                          <span
+                            class={`badge bg-${evento.modalidad === 'presencial' ? 'info' : evento.modalidad === 'online' ? 'primary' : 'secondary'}`}
+                          >
+                            {evento.modalidad?.toUpperCase()}
+                          </span>
+                        </td>
+                        <td>{evento.duracion ? evento.duracion + ' min' : 'N/A'}</td>
+                        <td class="text-end">
                           <button
                             class="btn btn-sm btn-light me-2 edit-evento"
                             data-evento-id={evento.id_evento}
                             title="Editar"
                           >
-                            <i class="ri-edit-line"></i>
+                            <i class="ri-edit-line" />
                           </button>
                           <button
                             class="btn btn-sm btn-danger delete-evento"
@@ -133,15 +138,16 @@ const eventosPageConfig: PageHeaderProps = {
                             data-evento-titulo={evento.titulo}
                             title="Eliminar"
                           >
-                            <i class="ri-delete-bin-line"></i>
+                            <i class="ri-delete-bin-line" />
                           </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )
+          }
 
           <div class="d-flex justify-content-between align-items-center mt-3">
             <div>
@@ -164,33 +170,45 @@ const eventosPageConfig: PageHeaderProps = {
           <h5 class="modal-title">Nuevo Evento</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-  <form id="addEventoForm" novalidate>
+        <form id="addEventoForm" novalidate>
           <div class="modal-body">
             <div class="row g-3">
               <div class="col-12">
-                <label for="add_titulo" class="form-label">Título <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" id="add_titulo" name="titulo" required>
+                <label for="add_titulo" class="form-label"
+                  >Título <span class="text-danger">*</span></label
+                >
+                <input type="text" class="form-control" id="add_titulo" name="titulo" required />
               </div>
               <div class="col-12">
                 <label for="add_descripcion" class="form-label">Descripción</label>
-                <textarea class="form-control" id="add_descripcion" name="descripcion" rows="3"></textarea>
+                <textarea class="form-control" id="add_descripcion" name="descripcion" rows="3"
+                ></textarea>
               </div>
               <div class="col-12">
                 <label for="add_afiche_grafico" class="form-label">URL Afiche Gráfico</label>
-                <input type="text" class="form-control" id="add_afiche_grafico" name="afiche_grafico" placeholder="https://ejemplo.com/imagen.jpg">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="add_afiche_grafico"
+                  name="afiche_grafico"
+                  placeholder="https://ejemplo.com/imagen.jpg"
+                />
                 <small class="text-muted">URL de la imagen del afiche del evento</small>
               </div>
               <div class="col-md-6">
-                <label for="add_visibilidad" class="form-label">Visibilidad <span class="text-danger">*</span></label>
+                <label for="add_visibilidad" class="form-label"
+                  >Visibilidad <span class="text-danger">*</span></label
+                >
                 <select class="form-select" id="add_visibilidad" name="visibilidad" required>
                   <option value="publico">Público</option>
                   <option value="privado">Privado</option>
                   <option value="interno">Interno</option>
-
                 </select>
               </div>
               <div class="col-md-6">
-                <label for="add_modalidad" class="form-label">Modalidad <span class="text-danger">*</span></label>
+                <label for="add_modalidad" class="form-label"
+                  >Modalidad <span class="text-danger">*</span></label
+                >
                 <select class="form-select" id="add_modalidad" name="modalidad" required>
                   <option value="presencial">Presencial</option>
                   <option value="online">Online</option>
@@ -199,34 +217,62 @@ const eventosPageConfig: PageHeaderProps = {
               </div>
               <div class="col-12">
                 <label for="add_qr_url" class="form-label">Código QR</label>
-                <input type="text" class="form-control" id="add_qr_url" name="qr_url" placeholder="URL del código QR">
-                <small class="text-muted">Dejar vacío o ingresar URL del código QR del evento</small>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="add_qr_url"
+                  name="qr_url"
+                  placeholder="URL del código QR"
+                />
+                <small class="text-muted">Dejar vacío o ingresar URL del código QR del evento</small
+                >
               </div>
               <div class="col-md-6">
-                <label for="add_duracion" class="form-label">Duración (minutos) <span class="text-danger">*</span></label>
-                <input type="number" class="form-control" id="add_duracion" name="duracion" min="1" required>
+                <label for="add_duracion" class="form-label"
+                  >Duración (minutos) <span class="text-danger">*</span></label
+                >
+                <input
+                  type="number"
+                  class="form-control"
+                  id="add_duracion"
+                  name="duracion"
+                  min="1"
+                  required
+                />
                 <small class="text-muted">Ingrese la duración total del evento en minutos</small>
               </div>
               <div class="col-md-6">
-                <label for="add_requiere_estacionamiento" class="form-label">Requiere Estacionamiento</label>
-                <select class="form-select" id="add_requiere_estacionamiento" name="requiere_estacionamiento">
+                <label for="add_requiere_estacionamiento" class="form-label"
+                  >Requiere Estacionamiento</label
+                >
+                <select
+                  class="form-select"
+                  id="add_requiere_estacionamiento"
+                  name="requiere_estacionamiento"
+                >
                   <option value="false">No</option>
                   <option value="true">Sí</option>
                 </select>
               </div>
               <div class="col-12" id="add_lugar_container">
-                <label for="add_id_lugar" class="form-label">Lugar <span class="text-danger">*</span></label>
+                <label for="add_id_lugar" class="form-label"
+                  >Lugar <span class="text-danger">*</span></label
+                >
                 <select class="form-select" id="add_id_lugar" name="id_lugar" required>
                   <option value="">Cargando lugares...</option>
                 </select>
                 <small class="text-muted">Seleccione el lugar donde se realizará el evento</small>
               </div>
               <div class="col-12">
-                <label for="add_id_usuarios" class="form-label">Director de Carrera <span class="text-danger">*</span></label>
+                <label for="add_id_usuarios" class="form-label"
+                  >Director de Carrera <span class="text-danger">*</span></label
+                >
                 <select class="form-select" id="add_id_usuarios" name="id_usuarios" required>
                   <option value="">Cargando directores...</option>
                 </select>
-                <small class="text-muted">Seleccione el director de carrera responsable del evento</small>
+                <small class="text-muted"
+                  >Seleccione el director de carrera responsable del evento</small
+                >
               </div>
             </div>
           </div>
@@ -240,7 +286,6 @@ const eventosPageConfig: PageHeaderProps = {
       </div>
     </div>
   </div>
-
 
   <!-- Modal para Editar Evento -->
   <div class="modal fade" id="editEventoModal" tabindex="-1">
@@ -273,7 +318,9 @@ const eventosPageConfig: PageHeaderProps = {
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-          <p>¿Está seguro que desea eliminar el evento <strong id="deleteEventoTitulo"></strong>?</p>
+          <p>
+            ¿Está seguro que desea eliminar el evento <strong id="deleteEventoTitulo"></strong>?
+          </p>
           <div class="alert alert-warning">
             <i class="ri-alert-line me-2"></i>
             Esta acción no se puede deshacer.
@@ -368,7 +415,7 @@ const eventosPageConfig: PageHeaderProps = {
       selectElement.innerHTML = '<option value="">Seleccione un director...</option>'
 
       // Agregar opciones de directores
-      directoresCarrera.forEach(director => {
+      directoresCarrera.forEach((director) => {
         const option = document.createElement('option')
         option.value = director.id_usuarios
         option.textContent = `${director.nombre} ${director.apellidos}${director.carrera ? ' - ' + director.carrera.descripcion : ''}`
@@ -405,7 +452,7 @@ const eventosPageConfig: PageHeaderProps = {
       selectElement.innerHTML = '<option value="">Seleccione un lugar...</option>'
 
       // Agregar opciones de lugares
-      lugares.forEach(lugar => {
+      lugares.forEach((lugar) => {
         const option = document.createElement('option')
         option.value = lugar.id_lugar
         option.textContent = `${lugar.nombre} - ${lugar.tipo}`
@@ -436,8 +483,10 @@ const eventosPageConfig: PageHeaderProps = {
     }
 
     const toggleFormInputs = (disabled) => {
-      const inputs = document.querySelectorAll('#editEventoModal input, #editEventoModal select, #editEventoModal textarea')
-      inputs.forEach(input => {
+      const inputs = document.querySelectorAll(
+        '#editEventoModal input, #editEventoModal select, #editEventoModal textarea'
+      )
+      inputs.forEach((input) => {
         input.disabled = disabled
       })
     }
@@ -447,7 +496,8 @@ const eventosPageConfig: PageHeaderProps = {
       if (saveBtn) {
         saveBtn.disabled = disabled
         if (disabled && text === 'Guardando...') {
-          saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Guardando...'
+          saveBtn.innerHTML =
+            '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Guardando...'
         } else {
           saveBtn.innerHTML = text
         }
@@ -620,10 +670,10 @@ const eventosPageConfig: PageHeaderProps = {
       const endIndex = startIndex + itemsPerPage
 
       // Ocultar todas las filas
-      allRows.forEach(row => row.style.display = 'none')
+      allRows.forEach((row) => (row.style.display = 'none'))
 
       // Mostrar filas de la página actual
-      filteredRows.slice(startIndex, endIndex).forEach(row => {
+      filteredRows.slice(startIndex, endIndex).forEach((row) => {
         row.style.display = ''
       })
 
@@ -637,11 +687,16 @@ const eventosPageConfig: PageHeaderProps = {
     }
 
     // Event listeners para paginación
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
       if (e.target.closest('.page-link')) {
         e.preventDefault()
         const page = parseInt(e.target.closest('.page-link').dataset.page)
-        if (page && page !== currentPage && page >= 1 && page <= Math.ceil(filteredRows.length / itemsPerPage)) {
+        if (
+          page &&
+          page !== currentPage &&
+          page >= 1 &&
+          page <= Math.ceil(filteredRows.length / itemsPerPage)
+        ) {
           showPage(page)
         }
       }
@@ -649,14 +704,14 @@ const eventosPageConfig: PageHeaderProps = {
 
     // Manejadores de modal
     const modalCancelButtons = document.querySelectorAll('[data-bs-dismiss="modal"]')
-    modalCancelButtons.forEach(button => {
+    modalCancelButtons.forEach((button) => {
       button.addEventListener('click', () => {
         cleanupModal()
       })
     })
 
     const modals = document.querySelectorAll('.modal')
-    modals.forEach(modal => {
+    modals.forEach((modal) => {
       modal.addEventListener('hidden.bs.modal', () => {
         cleanupModal()
         toggleFormInputs(false)
@@ -670,7 +725,7 @@ const eventosPageConfig: PageHeaderProps = {
 
     // Cargar directores y lugares cuando se abre el modal de agregar
     if (addEventoModal) {
-      addEventoModal.addEventListener('show.bs.modal', async function() {
+      addEventoModal.addEventListener('show.bs.modal', async function () {
         const selectDirector = document.getElementById('add_id_usuarios')
         const selectLugar = document.getElementById('add_id_lugar')
         const modalidadSelect = document.getElementById('add_modalidad')
@@ -700,7 +755,7 @@ const eventosPageConfig: PageHeaderProps = {
 
         // Evento para cambiar visibilidad del campo lugar según modalidad
         if (modalidadSelect) {
-          modalidadSelect.addEventListener('change', function() {
+          modalidadSelect.addEventListener('change', function () {
             toggleLugarField(this.value, 'add_lugar_container', 'add_id_lugar')
           })
         }
@@ -708,7 +763,7 @@ const eventosPageConfig: PageHeaderProps = {
     }
 
     if (addEventoForm) {
-      addEventoForm.addEventListener('submit', async function(e) {
+      addEventoForm.addEventListener('submit', async function (e) {
         e.preventDefault()
 
         const addBtn = document.getElementById('addEventoBtn')
@@ -736,7 +791,10 @@ const eventosPageConfig: PageHeaderProps = {
 
         const idLugarValue = (formData.get('id_lugar') || '').trim()
         if (modalidad !== 'online' && !idLugarValue) {
-          showFieldAlert('Seleccione el lugar para eventos presenciales o híbridos.', 'add_id_lugar')
+          showFieldAlert(
+            'Seleccione el lugar para eventos presenciales o híbridos.',
+            'add_id_lugar'
+          )
           return
         }
 
@@ -754,7 +812,8 @@ const eventosPageConfig: PageHeaderProps = {
 
         if (addBtn) {
           addBtn.disabled = true
-          addBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando...'
+          addBtn.innerHTML =
+            '<span class="spinner-border spinner-border-sm me-2"></span>Guardando...'
         }
 
         const data = {
@@ -791,7 +850,8 @@ const eventosPageConfig: PageHeaderProps = {
           })
         } catch (error) {
           console.error('Error:', error)
-          const apiMessage = error?.response?.data?.message || 'Ocurrió un problema al crear el evento.'
+          const apiMessage =
+            error?.response?.data?.message || 'Ocurrió un problema al crear el evento.'
           showRequestError('No se pudo crear el evento', apiMessage)
           resetAddButton()
         }
@@ -802,8 +862,8 @@ const eventosPageConfig: PageHeaderProps = {
     const editModal = document.getElementById('editEventoModal')
     const editButtons = document.querySelectorAll('.edit-evento')
 
-    editButtons.forEach(button => {
-      button.addEventListener('click', async function() {
+    editButtons.forEach((button) => {
+      button.addEventListener('click', async function () {
         currentEventoId = this.getAttribute('data-evento-id')
 
         const modal = new bootstrap.Modal(editModal)
@@ -832,7 +892,8 @@ const eventosPageConfig: PageHeaderProps = {
           document.getElementById('edit_modalidad').value = evento.modalidad || 'presencial'
           document.getElementById('edit_qr_url').value = evento.qr_url || ''
           document.getElementById('edit_duracion').value = evento.duracion || ''
-          document.getElementById('edit_requiere_estacionamiento').value = evento.requiere_estacionamiento ? 'true' : 'false'
+          document.getElementById('edit_requiere_estacionamiento').value =
+            evento.requiere_estacionamiento ? 'true' : 'false'
 
           // Poblar select de directores con el valor seleccionado
           const selectDirector = document.getElementById('edit_id_usuarios')
@@ -848,7 +909,7 @@ const eventosPageConfig: PageHeaderProps = {
           // Evento para cambiar visibilidad del campo lugar según modalidad
           const modalidadSelect = document.getElementById('edit_modalidad')
           if (modalidadSelect) {
-            modalidadSelect.addEventListener('change', function() {
+            modalidadSelect.addEventListener('change', function () {
               toggleLugarField(this.value, 'edit_lugar_container', 'edit_id_lugar')
             })
           }
@@ -867,7 +928,7 @@ const eventosPageConfig: PageHeaderProps = {
     })
 
     // Manejador para guardar cambios
-    document.addEventListener('click', async function(e) {
+    document.addEventListener('click', async function (e) {
       if (e.target && e.target.id === 'saveChangesBtn') {
         if (!currentEventoId) return
 
@@ -878,7 +939,8 @@ const eventosPageConfig: PageHeaderProps = {
         const modalidadValue = document.getElementById('edit_modalidad').value
         const qrValue = document.getElementById('edit_qr_url').value || ''
         const idUsuariosValue = document.getElementById('edit_id_usuarios').value
-        const requiereEstacionamientoValue = document.getElementById('edit_requiere_estacionamiento').value === 'true'
+        const requiereEstacionamientoValue =
+          document.getElementById('edit_requiere_estacionamiento').value === 'true'
 
         const duracionValue = document.getElementById('edit_duracion').value.trim()
         if (!duracionValue) {
@@ -924,7 +986,8 @@ const eventosPageConfig: PageHeaderProps = {
           })
         } catch (error) {
           console.error('Error:', error)
-          const apiMessage = error?.response?.data?.message || 'Ocurrió un problema al actualizar el evento.'
+          const apiMessage =
+            error?.response?.data?.message || 'Ocurrió un problema al actualizar el evento.'
           showRequestError('No se pudo actualizar el evento', apiMessage)
           toggleFormInputs(false)
           toggleSaveButton(false)
@@ -949,7 +1012,8 @@ const eventosPageConfig: PageHeaderProps = {
         if (!eventoToDelete) return
 
         const originalText = e.target.innerHTML
-        e.target.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Eliminando...'
+        e.target.innerHTML =
+          '<span class="spinner-border spinner-border-sm me-2"></span>Eliminando...'
         e.target.disabled = true
 
         try {
@@ -973,10 +1037,10 @@ const eventosPageConfig: PageHeaderProps = {
     // Funcionalidad de búsqueda
     const searchInput = document.getElementById('searchInput')
     if (searchInput && allRows.length > 0) {
-      searchInput.addEventListener('input', function(e) {
+      searchInput.addEventListener('input', function (e) {
         const searchTerm = e.target.value.toLowerCase()
 
-        filteredRows = allRows.filter(row => {
+        filteredRows = allRows.filter((row) => {
           const titulo = row.querySelector('td:first-child')?.textContent.toLowerCase() || ''
           const descripcion = row.querySelector('td:nth-child(2)')?.textContent.toLowerCase() || ''
           return titulo.includes(searchTerm) || descripcion.includes(searchTerm)
@@ -992,14 +1056,14 @@ const eventosPageConfig: PageHeaderProps = {
     if (sortButton && allRows.length > 0) {
       let isAscending = true
 
-      sortButton.addEventListener('click', function() {
+      sortButton.addEventListener('click', function () {
         filteredRows.sort((a, b) => {
-          const tituloA = a.querySelector('td:first-child .fw-medium')?.textContent.toLowerCase() || ''
-          const tituloB = b.querySelector('td:first-child .fw-medium')?.textContent.toLowerCase() || ''
+          const tituloA =
+            a.querySelector('td:first-child .fw-medium')?.textContent.toLowerCase() || ''
+          const tituloB =
+            b.querySelector('td:first-child .fw-medium')?.textContent.toLowerCase() || ''
 
-          return isAscending
-            ? tituloA.localeCompare(tituloB)
-            : tituloB.localeCompare(tituloA)
+          return isAscending ? tituloA.localeCompare(tituloB) : tituloB.localeCompare(tituloA)
         })
 
         isAscending = !isAscending

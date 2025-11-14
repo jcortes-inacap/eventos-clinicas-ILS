@@ -39,7 +39,11 @@ const fechasEventoPageConfig: PageHeaderProps = {
       <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
           <h5 class="card-title mb-0">Lista de Fechas de Eventos</h5>
-          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addFechaEventoModal">
+          <button
+            class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#addFechaEventoModal"
+          >
             <i class="ri-add-line me-1"></i> Nueva Fecha
           </button>
         </div>
@@ -50,12 +54,12 @@ const fechasEventoPageConfig: PageHeaderProps = {
                 <span class="input-group-text">
                   <i class="ri-search-line"></i>
                 </span>
-                <input 
-                  type="text" 
-                  class="form-control" 
-                  id="searchInput" 
+                <input
+                  type="text"
+                  class="form-control"
+                  id="searchInput"
                   placeholder="Buscar por evento o fecha..."
-                >
+                />
               </div>
             </div>
             <div class="col-md-4 text-end">
@@ -65,138 +69,144 @@ const fechasEventoPageConfig: PageHeaderProps = {
             </div>
           </div>
 
-          {hasError ? (
-            <div class="alert alert-danger" role="alert">
-              <i class="ri-error-warning-line me-2"></i>
-              Error al cargar las fechas de eventos. Por favor, intente nuevamente.
-            </div>
-          ) : fechasEvento.length === 0 ? (
-            <div class="alert alert-info" role="alert">
-              <i class="ri-information-line me-2"></i>
-              No hay fechas de eventos registradas en el sistema.
-            </div>
-          ) : (
-            <div class="table-responsive">
-              <table class="table table-hover align-middle">
-                <thead class="table">
-                  <tr>
-                    <th>ID</th>
-                    <th>Evento</th>
-                    <th>Fecha</th>
-                    <th>Estado</th>
-                    <th class="text-end">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody id="fechasEventoTableBody">
-                  {fechasEvento
-                    .sort((a, b) => {
-                      // Ordenar por fecha de menor a mayor (más antigua primero)
-                      const fechaA = new Date(a.fecha.split('T')[0])
-                      const fechaB = new Date(b.fecha.split('T')[0])
-                      return fechaA - fechaB
-                    })
-                    .map((fechaEvento, index) => {
-                    // Parsear fecha correctamente sin ajuste de zona horaria
-                    // Manejar tanto formato "YYYY-MM-DD" como objeto Date
-                    let fecha
-                    let fechaString = ''
-                    
-                    try {
-                      if (typeof fechaEvento.fecha === 'string') {
-                        // Formato esperado: "YYYY-MM-DD"
-                        const fechaParts = fechaEvento.fecha.split('T')[0].split('-')
-                        if (fechaParts.length === 3) {
-                          const [year, month, day] = fechaParts.map(Number)
-                          fecha = new Date(year, month - 1, day)
-                          fechaString = fechaEvento.fecha.split('T')[0]
-                        } else {
+          {
+            hasError ? (
+              <div class="alert alert-danger" role="alert">
+                <i class="ri-error-warning-line me-2" />
+                Error al cargar las fechas de eventos. Por favor, intente nuevamente.
+              </div>
+            ) : fechasEvento.length === 0 ? (
+              <div class="alert alert-info" role="alert">
+                <i class="ri-information-line me-2" />
+                No hay fechas de eventos registradas en el sistema.
+              </div>
+            ) : (
+              <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                  <thead class="table">
+                    <tr>
+                      <th>ID</th>
+                      <th>Evento</th>
+                      <th>Fecha</th>
+                      <th>Estado</th>
+                      <th class="text-end">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody id="fechasEventoTableBody">
+                    {fechasEvento
+                      .sort((a, b) => {
+                        // Ordenar por fecha de menor a mayor (más antigua primero)
+                        const fechaA = new Date(a.fecha.split('T')[0])
+                        const fechaB = new Date(b.fecha.split('T')[0])
+                        return fechaA.getTime() - fechaB.getTime()
+                      })
+                      .map((fechaEvento, index) => {
+                        // Parsear fecha correctamente sin ajuste de zona horaria
+                        // Manejar tanto formato "YYYY-MM-DD" como objeto Date
+                        let fecha
+                        let fechaString = ''
+
+                        try {
+                          if (typeof fechaEvento.fecha === 'string') {
+                            // Formato esperado: "YYYY-MM-DD"
+                            const fechaParts = fechaEvento.fecha.split('T')[0].split('-')
+                            if (fechaParts.length === 3) {
+                              const [year, month, day] = fechaParts.map(Number)
+                              fecha = new Date(year, month - 1, day)
+                              fechaString = fechaEvento.fecha.split('T')[0]
+                            } else {
+                              fecha = new Date()
+                            }
+                          } else {
+                            fecha = new Date()
+                          }
+                        } catch (e) {
                           fecha = new Date()
+                          fechaString = ''
                         }
-                      } else {
-                        fecha = new Date()
-                      }
-                    } catch (e) {
-                      fecha = new Date()
-                      fechaString = ''
-                    }
-                    
-                    const hoy = new Date()
-                    hoy.setHours(0, 0, 0, 0)
-                    const esHoy = fecha.getTime() === hoy.getTime()
-                    const esFutura = fecha > hoy
-                    const esPasada = fecha < hoy
-                    
-                    return (
-                      <tr>
-                        <td>
-                          <div class="d-flex flex-column">
-                            <span class="text-muted" style="width: fit-content;">#{index + 1}</span>
-                          </div>
-                        </td>
-                        <td>
-                          <div>
-                            <div class="fw-medium">
-                              {fechaEvento.evento?.titulo || 'Sin evento'}
-                            </div>
-                            <small class="text-muted">
-                              ID Evento: #{fechaEvento.id_evento}
-                            </small>
-                          </div>
-                        </td>
-                        <td>
-                          <div class="d-flex align-items-center">
-                            <i class="ri-calendar-line me-2"></i>
-                            <span>{fecha.toLocaleDateString('es-ES', { 
-                              year: 'numeric', 
-                              month: 'long', 
-                              day: 'numeric' 
-                            })}</span>
-                          </div>
-                        </td>
-                        <td>
-                          {esHoy ? (
-                            <span class="badge bg-primary">
-                              <i class="ri-calendar-check-line me-1"></i>
-                              Hoy
-                            </span>
-                          ) : esFutura ? (
-                            <span class="badge bg-success">
-                              <i class="ri-calendar-event-line me-1"></i>
-                              Próxima
-                            </span>
-                          ) : (
-                            <span class="badge bg-secondary">
-                              <i class="ri-calendar-line me-1"></i>
-                              Pasada
-                            </span>
-                          )}
-                        </td>
-                        <td class="text-end">
-                            <button 
-                              class="btn btn-sm btn-light me-2 edit-fecha" 
-                              data-fecha-id={fechaEvento.id_fecha}
-                              data-fecha={fechaString}
-                              title="Editar"
-                            >
-                              <i class="ri-edit-line"></i>
-                            </button>
-                            <button 
-                              class="btn btn-sm btn-danger delete-fecha" 
-                              data-fecha-id={fechaEvento.id_fecha}
-                              data-fecha-evento={fechaEvento.evento?.titulo || 'Sin nombre'}
-                              data-fecha-date={fecha.toLocaleDateString('es-ES')}
-                              title="Eliminar"
-                            >
-                              <i class="ri-delete-bin-line"></i>
-                            </button>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
+
+                        const hoy = new Date()
+                        hoy.setHours(0, 0, 0, 0)
+                        const esHoy = fecha.getTime() === hoy.getTime()
+                        const esFutura = fecha > hoy
+                        const esPasada = fecha < hoy
+
+                        return (
+                          <tr>
+                            <td>
+                              <div class="d-flex flex-column">
+                                <span class="text-muted" style="width: fit-content;">
+                                  #{index + 1}
+                                </span>
+                              </div>
+                            </td>
+                            <td>
+                              <div>
+                                <div class="fw-medium">
+                                  {fechaEvento.evento?.titulo || 'Sin evento'}
+                                </div>
+                                <small class="text-muted">
+                                  ID Evento: #{fechaEvento.id_evento}
+                                </small>
+                              </div>
+                            </td>
+                            <td>
+                              <div class="d-flex align-items-center">
+                                <i class="ri-calendar-line me-2" />
+                                <span>
+                                  {fecha.toLocaleDateString('es-ES', {
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric'
+                                  })}
+                                </span>
+                              </div>
+                            </td>
+                            <td>
+                              {esHoy ? (
+                                <span class="badge bg-primary">
+                                  <i class="ri-calendar-check-line me-1" />
+                                  Hoy
+                                </span>
+                              ) : esFutura ? (
+                                <span class="badge bg-success">
+                                  <i class="ri-calendar-event-line me-1" />
+                                  Próxima
+                                </span>
+                              ) : (
+                                <span class="badge bg-secondary">
+                                  <i class="ri-calendar-line me-1" />
+                                  Pasada
+                                </span>
+                              )}
+                            </td>
+                            <td class="text-end">
+                              <button
+                                class="btn btn-sm btn-light me-2 edit-fecha"
+                                data-fecha-id={fechaEvento.id_fecha}
+                                data-fecha={fechaString}
+                                title="Editar"
+                              >
+                                <i class="ri-edit-line" />
+                              </button>
+                              <button
+                                class="btn btn-sm btn-danger delete-fecha"
+                                data-fecha-id={fechaEvento.id_fecha}
+                                data-fecha-evento={fechaEvento.evento?.titulo || 'Sin nombre'}
+                                data-fecha-date={fecha.toLocaleDateString('es-ES')}
+                                title="Eliminar"
+                              >
+                                <i class="ri-delete-bin-line" />
+                              </button>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                  </tbody>
+                </table>
+              </div>
+            )
+          }
 
           <div class="d-flex justify-content-between align-items-center mt-3">
             <div>
@@ -219,19 +229,23 @@ const fechasEventoPageConfig: PageHeaderProps = {
           <h5 class="modal-title">Nueva Fecha de Evento</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-  <form id="addFechaEventoForm" novalidate>
+        <form id="addFechaEventoForm" novalidate>
           <div class="modal-body">
             <div class="row g-3">
               <div class="col-12">
-                <label for="add_id_evento" class="form-label">Evento <span class="text-danger">*</span></label>
+                <label for="add_id_evento" class="form-label"
+                  >Evento <span class="text-danger">*</span></label
+                >
                 <select class="form-select" id="add_id_evento" name="id_evento" required>
                   <option value="">Cargando eventos...</option>
                 </select>
                 <small class="text-muted">Seleccione el evento al que pertenece esta fecha</small>
               </div>
               <div class="col-12">
-                <label for="add_fecha" class="form-label">Fecha <span class="text-danger">*</span></label>
-                <input type="date" class="form-control" id="add_fecha" name="fecha" required>
+                <label for="add_fecha" class="form-label"
+                  >Fecha <span class="text-danger">*</span></label
+                >
+                <input type="date" class="form-control" id="add_fecha" name="fecha" required />
                 <small class="text-muted">La fecha no puede ser anterior a hoy</small>
               </div>
             </div>
@@ -278,7 +292,10 @@ const fechasEventoPageConfig: PageHeaderProps = {
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-          <p>¿Está seguro que desea eliminar la fecha <strong id="deleteFechaDate"></strong> del evento <strong id="deleteFechaEvento"></strong>?</p>
+          <p>
+            ¿Está seguro que desea eliminar la fecha <strong id="deleteFechaDate"></strong> del evento
+            <strong id="deleteFechaEvento"></strong>?
+          </p>
           <div class="alert alert-warning">
             <i class="ri-alert-line me-2"></i>
             Esta acción eliminará permanentemente la fecha y no se puede deshacer.
@@ -314,17 +331,17 @@ const fechasEventoPageConfig: PageHeaderProps = {
     // Función auxiliar para parsear fechas correctamente (sin ajuste de zona horaria)
     const parseFecha = (fechaString) => {
       if (!fechaString) return new Date()
-      
+
       try {
         // Eliminar la parte de tiempo si existe (T00:00:00)
         const fechaSolo = fechaString.split('T')[0]
         const [year, month, day] = fechaSolo.split('-').map(Number)
-        
+
         if (!year || !month || !day) {
           console.warn('Fecha inválida:', fechaString)
           return new Date()
         }
-        
+
         return new Date(year, month - 1, day)
       } catch (error) {
         console.error('Error parseando fecha:', fechaString, error)
@@ -335,11 +352,11 @@ const fechasEventoPageConfig: PageHeaderProps = {
     // Función auxiliar para formatear fecha a YYYY-MM-DD
     const formatFecha = (fecha) => {
       if (!(fecha instanceof Date)) return ''
-      
+
       const year = fecha.getFullYear()
       const month = String(fecha.getMonth() + 1).padStart(2, '0')
       const day = String(fecha.getDate()).padStart(2, '0')
-      
+
       return `${year}-${month}-${day}`
     }
 
@@ -381,8 +398,10 @@ const fechasEventoPageConfig: PageHeaderProps = {
     }
 
     const toggleFormInputs = (disabled) => {
-      const inputs = document.querySelectorAll('#editFechaEventoModal input, #editFechaEventoModal select')
-      inputs.forEach(input => {
+      const inputs = document.querySelectorAll(
+        '#editFechaEventoModal input, #editFechaEventoModal select'
+      )
+      inputs.forEach((input) => {
         input.disabled = disabled
       })
     }
@@ -392,7 +411,8 @@ const fechasEventoPageConfig: PageHeaderProps = {
       if (saveBtn) {
         saveBtn.disabled = disabled
         if (disabled && text === 'Guardando...') {
-          saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Guardando...'
+          saveBtn.innerHTML =
+            '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Guardando...'
         } else {
           saveBtn.innerHTML = text
         }
@@ -423,17 +443,19 @@ const fechasEventoPageConfig: PageHeaderProps = {
       selectElement.innerHTML = '<option value="">Seleccione un evento...</option>'
 
       // Agregar opciones de eventos (solo eventos activos)
-      eventos.filter(evento => evento.estado === 1).forEach(evento => {
-        const option = document.createElement('option')
-        option.value = evento.id_evento
-        option.textContent = `${evento.titulo} - ${evento.modalidad?.toUpperCase()}`
-        
-        if (selectedId && evento.id_evento === selectedId) {
-          option.selected = true
-        }
-        
-        selectElement.appendChild(option)
-      })
+      eventos
+        .filter((evento) => evento.estado === 1)
+        .forEach((evento) => {
+          const option = document.createElement('option')
+          option.value = evento.id_evento
+          option.textContent = `${evento.titulo} - ${evento.modalidad?.toUpperCase()}`
+
+          if (selectedId && evento.id_evento === selectedId) {
+            option.selected = true
+          }
+
+          selectElement.appendChild(option)
+        })
     }
 
     // Función para mostrar alerta de éxito
@@ -554,12 +576,12 @@ const fechasEventoPageConfig: PageHeaderProps = {
       const endIndex = startIndex + itemsPerPage
 
       // Ocultar todas las filas
-      allRows.forEach(row => row.style.display = 'none')
+      allRows.forEach((row) => (row.style.display = 'none'))
 
       // Mostrar filas de la página actual y renumerar
       filteredRows.slice(startIndex, endIndex).forEach((row, index) => {
         row.style.display = ''
-        
+
         // Actualizar el número ficticio en la primera columna
         const badgeContainer = row.querySelector('td:first-child .badge')
         if (badgeContainer) {
@@ -577,11 +599,16 @@ const fechasEventoPageConfig: PageHeaderProps = {
     }
 
     // Event listeners para paginación
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
       if (e.target.closest('.page-link')) {
         e.preventDefault()
         const page = parseInt(e.target.closest('.page-link').dataset.page)
-        if (page && page !== currentPage && page >= 1 && page <= Math.ceil(filteredRows.length / itemsPerPage)) {
+        if (
+          page &&
+          page !== currentPage &&
+          page >= 1 &&
+          page <= Math.ceil(filteredRows.length / itemsPerPage)
+        ) {
           showPage(page)
         }
       }
@@ -589,14 +616,14 @@ const fechasEventoPageConfig: PageHeaderProps = {
 
     // Manejadores de modal
     const modalCancelButtons = document.querySelectorAll('[data-bs-dismiss="modal"]')
-    modalCancelButtons.forEach(button => {
+    modalCancelButtons.forEach((button) => {
       button.addEventListener('click', () => {
         cleanupModal()
       })
     })
 
     const modals = document.querySelectorAll('.modal')
-    modals.forEach(modal => {
+    modals.forEach((modal) => {
       modal.addEventListener('hidden.bs.modal', () => {
         cleanupModal()
         toggleFormInputs(false)
@@ -608,7 +635,7 @@ const fechasEventoPageConfig: PageHeaderProps = {
     const setMinDate = () => {
       const today = new Date()
       const todayString = formatFecha(today)
-      
+
       const addFechaInput = document.getElementById('add_fecha')
       if (addFechaInput) {
         addFechaInput.setAttribute('min', todayString)
@@ -618,17 +645,17 @@ const fechasEventoPageConfig: PageHeaderProps = {
     // Lógica para agregar nueva fecha de evento
     const addFechaEventoForm = document.getElementById('addFechaEventoForm')
     const addFechaEventoModal = document.getElementById('addFechaEventoModal')
-    
+
     // Cargar eventos cuando se abre el modal de agregar
     if (addFechaEventoModal) {
-      addFechaEventoModal.addEventListener('show.bs.modal', async function() {
+      addFechaEventoModal.addEventListener('show.bs.modal', async function () {
         const selectEvento = document.getElementById('add_id_evento')
-        
+
         // Cargar eventos
         if (selectEvento) {
           selectEvento.innerHTML = '<option value="">Cargando eventos...</option>'
           selectEvento.disabled = true
-          
+
           await loadEventos()
           populateEventosSelect(selectEvento)
           selectEvento.disabled = false
@@ -638,9 +665,9 @@ const fechasEventoPageConfig: PageHeaderProps = {
         setMinDate()
       })
     }
-    
+
     if (addFechaEventoForm) {
-      addFechaEventoForm.addEventListener('submit', async function(e) {
+      addFechaEventoForm.addEventListener('submit', async function (e) {
         e.preventDefault()
 
         const addBtn = document.getElementById('addFechaEventoBtn')
@@ -677,7 +704,8 @@ const fechasEventoPageConfig: PageHeaderProps = {
 
         if (addBtn) {
           addBtn.disabled = true
-          addBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando...'
+          addBtn.innerHTML =
+            '<span class="spinner-border spinner-border-sm me-2"></span>Guardando...'
         }
 
         const data = {
@@ -694,7 +722,7 @@ const fechasEventoPageConfig: PageHeaderProps = {
 
         try {
           await ApiService.createFechaEvento(data)
-          
+
           const modal = bootstrap.Modal.getInstance(document.getElementById('addFechaEventoModal'))
           modal.hide()
 
@@ -703,7 +731,8 @@ const fechasEventoPageConfig: PageHeaderProps = {
           })
         } catch (error) {
           console.error('Error:', error)
-          const apiMessage = error?.response?.data?.message || 'Ocurrió un problema al crear la fecha de evento.'
+          const apiMessage =
+            error?.response?.data?.message || 'Ocurrió un problema al crear la fecha de evento.'
           showRequestError('No se pudo crear la fecha de evento', apiMessage)
           resetAddButton()
         }
@@ -714,8 +743,8 @@ const fechasEventoPageConfig: PageHeaderProps = {
     const editModal = document.getElementById('editFechaEventoModal')
     const editButtons = document.querySelectorAll('.edit-fecha')
 
-    editButtons.forEach(button => {
-      button.addEventListener('click', async function() {
+    editButtons.forEach((button) => {
+      button.addEventListener('click', async function () {
         currentFechaId = this.getAttribute('data-fecha-id')
 
         const modal = new bootstrap.Modal(editModal)
@@ -731,7 +760,7 @@ const fechasEventoPageConfig: PageHeaderProps = {
             ApiService.getFechaEvento(currentFechaId),
             loadEventos()
           ])
-          
+
           const fechaEvento = response.data
 
           modalBody.innerHTML = createFormHTML()
@@ -745,7 +774,7 @@ const fechasEventoPageConfig: PageHeaderProps = {
           // Asegurarse de que la fecha esté en formato YYYY-MM-DD
           const fechaValue = fechaEvento.fecha.split('T')[0]
           fechaInput.value = fechaValue
-          
+
           // Establecer fecha mínima a hoy (en hora local, no UTC)
           const today = new Date()
           const todayString = formatFecha(today)
@@ -765,7 +794,7 @@ const fechasEventoPageConfig: PageHeaderProps = {
     })
 
     // Manejador para guardar cambios
-    document.addEventListener('click', async function(e) {
+    document.addEventListener('click', async function (e) {
       if (e.target && e.target.id === 'saveChangesBtn') {
         if (!currentFechaId) return
 
@@ -790,7 +819,7 @@ const fechasEventoPageConfig: PageHeaderProps = {
         const selectedDate = parseFecha(fechaValue)
         const today = new Date()
         today.setHours(0, 0, 0, 0)
-        
+
         if (selectedDate < today) {
           showFieldAlert('La fecha no puede ser anterior a hoy.', 'edit_fecha')
           return
@@ -815,7 +844,9 @@ const fechasEventoPageConfig: PageHeaderProps = {
           })
         } catch (error) {
           console.error('Error:', error)
-          const apiMessage = error?.response?.data?.message || 'Ocurrió un problema al actualizar la fecha de evento.'
+          const apiMessage =
+            error?.response?.data?.message ||
+            'Ocurrió un problema al actualizar la fecha de evento.'
           showRequestError('No se pudo actualizar la fecha de evento', apiMessage)
           toggleFormInputs(false)
           toggleSaveButton(false)
@@ -842,7 +873,8 @@ const fechasEventoPageConfig: PageHeaderProps = {
         if (!fechaToDelete) return
 
         const originalText = e.target.innerHTML
-        e.target.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Eliminando...'
+        e.target.innerHTML =
+          '<span class="spinner-border spinner-border-sm me-2"></span>Eliminando...'
         e.target.disabled = true
 
         try {
@@ -856,7 +888,8 @@ const fechasEventoPageConfig: PageHeaderProps = {
           })
         } catch (error) {
           console.error('Error:', error)
-          const apiMessage = error?.response?.data?.message || 'Ocurrió un problema al eliminar la fecha de evento.'
+          const apiMessage =
+            error?.response?.data?.message || 'Ocurrió un problema al eliminar la fecha de evento.'
           showRequestError('No se pudo eliminar la fecha de evento', apiMessage)
           e.target.innerHTML = originalText
           e.target.disabled = false
@@ -867,10 +900,10 @@ const fechasEventoPageConfig: PageHeaderProps = {
     // Funcionalidad de búsqueda
     const searchInput = document.getElementById('searchInput')
     if (searchInput && allRows.length > 0) {
-      searchInput.addEventListener('input', function(e) {
+      searchInput.addEventListener('input', function (e) {
         const searchTerm = e.target.value.toLowerCase()
 
-        filteredRows = allRows.filter(row => {
+        filteredRows = allRows.filter((row) => {
           const evento = row.querySelector('td:nth-child(2)')?.textContent.toLowerCase() || ''
           const fecha = row.querySelector('td:nth-child(3)')?.textContent.toLowerCase() || ''
           return evento.includes(searchTerm) || fecha.includes(searchTerm)
@@ -895,10 +928,10 @@ const fechasEventoPageConfig: PageHeaderProps = {
       // Comenzar en estado ascendente (ya que las fechas ya están ordenadas así)
       let isAscending = true
 
-      sortButton.addEventListener('click', function() {
+      sortButton.addEventListener('click', function () {
         // Invertir el orden
         isAscending = !isAscending
-        
+
         filteredRows.sort((a, b) => {
           const fechaA = a.querySelector('td:nth-child(3)')?.textContent || ''
           const fechaB = b.querySelector('td:nth-child(3)')?.textContent || ''
@@ -906,7 +939,7 @@ const fechasEventoPageConfig: PageHeaderProps = {
           const dateA = new Date(fechaA.split('/').reverse().join('-'))
           const dateB = new Date(fechaB.split('/').reverse().join('-'))
 
-          return isAscending ? dateA - dateB : dateB - dateA
+          return isAscending ? dateA.getTime() - dateB.getTime() : dateB.getTime() - dateA.getTime()
         })
 
         this.innerHTML = isAscending
