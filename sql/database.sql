@@ -1,7 +1,5 @@
 BEGIN;
 
-CREATE TYPE visibilidad_enum AS ENUM('publico','privado','interno');
-CREATE TYPE modalidad_enum AS ENUM('presencial','online','hibrida');
 CREATE TYPE estado_bloque_enum AS ENUM('activo','inactivo');
 CREATE TYPE estado_inscripcion_enum AS ENUM('pendiente','confirmada','cancelada');
 
@@ -53,8 +51,8 @@ CREATE TABLE evento(
     titulo VARCHAR(200) NOT NULL,
     descripcion TEXT,
     afiche_grafico VARCHAR(255),
-    visibilidad visibilidad_enum NOT NULL,
-    modalidad modalidad_enum NOT NULL,
+    visibilidad VARCHAR(40),
+    modalidad VARCHAR(40),
     qr_url VARCHAR(255),
     requiere_estacionamiento BOOLEAN NOT NULL DEFAULT FALSE,
     duracion INTEGER,
