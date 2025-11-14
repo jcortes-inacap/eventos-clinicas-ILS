@@ -5,13 +5,15 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\AsignacionController;
 use App\Http\Controllers\CatalogoController;
-use App\Http\Controllers\EventoController;
-use App\Http\Controllers\FechaEventoController;
-use App\Http\Controllers\LugarController;
+use App\Http\Controllers\AreaController;
+use App\Http\Controllers\CarreraController;
 use App\Models\Usuario;
 use App\Http\Controllers\UsuarioController;
 use App\Models\Rol;
 use App\Models\Carrera;
+use App\Http\Controllers\EventoController;
+use App\Http\Controllers\LugarController;
+use App\Http\Controllers\FechaEventoController;
 
 /*
 
@@ -70,6 +72,9 @@ Route::prefix('catalogos')->group(function() {
 
     // TODO agregar más catálogos si es necesario, por ejemplo docentes, asistentes, etc...
 });
+
+Route::apiResource('areas', AreaController::class);
+Route::apiResource('carreras', CarreraController::class);
 
 // ============================================
 // RUTAS DE EVENTOS (CRUD COMPLETO)

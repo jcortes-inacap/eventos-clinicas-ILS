@@ -14,10 +14,17 @@ CREATE TABLE roles(
     estado INTEGER NOT NULL DEFAULT 1
 );
 
+CREATE TABLE areas(
+    id_area INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    descripcion VARCHAR(150) NOT NULL,
+    estado INTEGER NOT NULL DEFAULT 1
+);
+
 CREATE TABLE carreras(
     id_carrera INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     descripcion VARCHAR(150) NOT NULL,
-    estado INTEGER NOT NULL DEFAULT 1
+    estado INTEGER NOT NULL DEFAULT 1,
+    id_area INTEGER REFERENCES areas(id_area) ON UPDATE CASCADE
 );
 
 CREATE TABLE usuarios(
@@ -142,6 +149,7 @@ CREATE INDEX idx_bhorario_id_evento ON bloque_horario(id_evento);
 CREATE INDEX idx_cupos_id_bhorario ON cupos(id_bloquehorario);
 CREATE INDEX idx_insc_id_bhorario ON inscripcion(id_bloquehorario);
 CREATE INDEX idx_insc_id_participante ON inscripcion(id_participante);
+CREATE INDEX idx_inscr_id_area ON carreras(id_area);
 
 COMMIT;
 
@@ -155,17 +163,59 @@ INSERT INTO roles (descripcion, estado) VALUES
 ('Estudiante', 1),
 ('Mandinga', 0);
 
+--Insertar áreas de Inacap--
+INSERT INTO areas (descripcion, estado) VALUES
+('Administracion', 1),
+('Gastronomia', 1),
+('Salud', 1),
+('Turismo y Hospitalidad', 1),
+('Agroindustria y medioambiente', 1);
+('Construcción', 1);
+('Energías Renovables y Eficiencia Energética', 1);
+('Logística', 1);
+('Mecánica', 1);
+('Minería', 1);
+('Automatización y Robótica', 1);
+('Diseño e Industria Digital', 1);
+('Electricidad, Electrónica y Telecomunicaciones', 1);
+('Tecnologías de Información y Ciberseguridad', 1);
+
 -- Insertar carreras de INACAP sede La Serena
-INSERT INTO carreras (descripcion, estado) VALUES
-('Ingenieria Informatica', 1),
-('Ingenieria Civil Industrial', 0),
-('Ingenieria en Maquinaria y Vehiculos Pesados', 1),
-('Ingenieria en Conectividad y Redes', 1),
-('Analista Programador', 1),
-('Administracion de Empresas', 1),
-('Contabilidad General', 1),
-('Construccion Civil', 1),
-('Ingenieria Civil Informatica', 0);
+INSERT INTO carreras (descripcion, estado, id_area)
+VALUES ('Ingenieria Informatica', 1,
+        SELECT id_area FROM areas WHERE descripcion = 'Tecnologías de Información y Ciberseguridad');
+
+INSERT INTO carreras (descripcion, estado, id_area)
+VALUES ('Ingenieria Civil Industrial', 0,
+        SELECT id_area FROM areas WHERE descripcion = 'Administracion');
+
+INSERT INTO carreras (descripcion, estado, id_area)
+VALUES ('Ingenieria en Maquinaria y Vehiculos Pesados', 1, 
+        SELECT id_area FROM areas WHERE descripcion = 'Mecánica');
+
+INSERT INTO carreras (descripcion, estado, id_area)
+VALUES ('Ingenieria en Conectividad y Redes', 1, 
+        SELECT id_area FROM areas WHERE descripcion = 'Tecnologías de Información y Ciberseguridad');
+
+INSERT INTO carreras (descripcion, estado, id_area)
+VALUES ('Analista Programador', 1, 
+        SELECT id_area FROM areas WHERE descripcion = 'Tecnologías de Información y Ciberseguridad');
+
+INSERT INTO carreras (descripcion, estado, id_area)
+VALUES ('Administracion de Empresas', 1, 
+        SELECT id_area FROM areas WHERE descripcion = 'Administracion');
+
+INSERT INTO carreras (descripcion, estado, id_area)
+VALUES ('Contabilidad General', 1, 
+        SELECT id_area FROM areas WHERE descripcion = 'Administracion');
+
+INSERT INTO carreras (descripcion, estado, id_area)
+VALUES('Construccion Civil', 1, 
+       SELECT id_area FROM areas WHERE descripcion = 'Construcción');
+
+INSERT INTO carreras (descripcion, estado, id_area)
+VALUES ('Ingenieria Civil Informatica', 0, 
+        SELECT id_area FROM areas WHERE descripcion = 'Tecnologías de Información y Ciberseguridad');
 
 -- Asignar usuarios como director de carrera
 INSERT INTO usuarios (nombre, apellidos, usuario, clave, id_roles, id_carrera)

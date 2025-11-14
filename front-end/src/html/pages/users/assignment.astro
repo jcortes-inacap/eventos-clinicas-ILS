@@ -103,7 +103,7 @@ const assignmentPageConfig: PageHeaderProps = {
                     </tr>
                   </thead>
                   <tbody id="usersTableBody">
-                    {usuarios.map(u => (
+                    {usuarios.map((u: any) => (
                       <tr data-user-id={u.id_usuarios}>
                         <td>{u.nombre} <span style="font-style:italic">{u.apellidos}</span></td>
                         <td>
@@ -607,6 +607,5 @@ const assignmentPageConfig: PageHeaderProps = {
 
         showPage(currentPage);
       });
-
   </script>
 </AdminLayout>
