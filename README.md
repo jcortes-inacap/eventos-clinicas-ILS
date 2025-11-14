@@ -32,3 +32,5 @@ Scripts SQL para la creación y población inicial de la base de datos PostgreSQ
 2. El sidebar principal se encuentra en front-end/src/html/layouts/admin/partials/_sidebar/_nav-tree.astro
 3. Las "Paginas" van en la carpeta html/pages
 4. Los ejemplos siguiendo los puntos anteriores se encuentran en la carpeta users/assignment y eventos/
+
+# Última actualización - 14/11/2025
